@@ -23,12 +23,15 @@
     "graphql-request": "^7.2.0",
     "graphql-tag": "^2.12.6",
     "ink": "^6.3.0",
+    "ink-use-stdout-dimensions": "^1.0.5",
     "react": "^19.1.1"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
     "@types/node": "^24.3.1",
+    "@vitejs/plugin-react": "^5.0.2",
     "tsx": "^4.20.5",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5"
   }
 }

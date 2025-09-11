@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { Box, Text, useInput } from 'ink'
 import type { PlainClient } from '../client.js'
 import type { View } from './App.js'
+import { Layout } from './Layout.js'
+import { ScrollableList } from './ScrollableList.js'
 
 interface ThreadsViewProps {
   client: PlainClient
@@ -190,103 +192,92 @@ export function ThreadsView({ client, workspace, onNavigate }: ThreadsViewProps)
     )
   }
 
-  return (
-    <Box flexDirection="column" padding={1}>
-      {/* Header */}
-      <Box marginBottom={1} borderStyle="round" borderColor="cyan" padding={1}>
+  const threadItems = state.threads.map((thread, index) => (
+    <Box
+      key={thread.id}
+      borderStyle={index === state.selectedIndex ? 'round' : undefined}
+      borderColor={index === state.selectedIndex ? 'cyan' : undefined}
+      padding={index === state.selectedIndex ? 1 : 0}
+      marginBottom={1}
+    >
+      <Box flexDirection="column" width="100%">
+        {/* Main thread info */}
         <Box justifyContent="space-between">
-          <Text color="cyan" bold>
-            🎫 Threads ({state.threads.length})
+          <Box>
+            <Text color={index === state.selectedIndex ? 'cyan' : 'white'} bold>
+              {index === state.selectedIndex ? '► ' : '  '}
+              {thread.title || 'Untitled Thread'}
+            </Text>
+          </Box>
+          <Box>
+            <Text color={getStatusColor(thread.status)}>{thread.status}</Text>
+            <Text> {getPriorityIcon(thread.priority)}</Text>
+          </Box>
+        </Box>
+
+        {/* Customer and company info */}
+        <Box marginTop={0} marginLeft={2}>
+          <Text color="gray">
+            👤 {thread.customer.fullName} ({thread.customer.email.email})
+            {thread.customer.company && ` • 🏢 ${thread.customer.company.name}`}
           </Text>
-          <Text color="gray">[F] Filter • [R] Refresh • [Q] Back</Text>
+        </Box>
+
+        {/* Assignee */}
+        {thread.assignedToUser && (
+          <Box marginLeft={2}>
+            <Text color="gray">
+              👨‍💼 Assigned to: {thread.assignedToUser.user.publicName}
+            </Text>
+          </Box>
+        )}
+
+        {/* Labels */}
+        {thread.labels.length > 0 && (
+          <Box marginLeft={2}>
+            <Text color="gray">
+              🏷️ {thread.labels.map((label) => label.labelType.name).join(', ')}
+            </Text>
+          </Box>
+        )}
+
+        {/* Preview text */}
+        {thread.previewText && (
+          <Box marginLeft={2} marginTop={0}>
+            <Text color="gray">
+              💬 {thread.previewText.substring(0, 100)}
+              {thread.previewText.length > 100 ? '...' : ''}
+            </Text>
+          </Box>
+        )}
+
+        {/* Dates */}
+        <Box marginLeft={2} marginTop={0}>
+          <Text color="gray">
+            🕐 Updated: {formatDate(thread.updatedAt)}
+            {' • '}Created: {formatDate(thread.createdAt)}
+          </Text>
         </Box>
       </Box>
-
-      {/* Thread List */}
-      <Box flexDirection="column">
-        {state.threads.length === 0 ? (
-          <Box padding={2}>
-            <Text color="gray">No threads found</Text>
-          </Box>
-        ) : (
-          state.threads.map((thread, index) => (
-            <Box
-              key={thread.id}
-              borderStyle={index === state.selectedIndex ? 'round' : undefined}
-              borderColor={index === state.selectedIndex ? 'cyan' : undefined}
-              padding={index === state.selectedIndex ? 1 : 0}
-              marginBottom={1}
-            >
-              <Box flexDirection="column" width="100%">
-                {/* Main thread info */}
-                <Box justifyContent="space-between">
-                  <Box>
-                    <Text color={index === state.selectedIndex ? 'cyan' : 'white'} bold>
-                      {index === state.selectedIndex ? '► ' : '  '}
-                      {thread.title || 'Untitled Thread'}
-                    </Text>
-                  </Box>
-                  <Box>
-                    <Text color={getStatusColor(thread.status)}>{thread.status}</Text>
-                    <Text> {getPriorityIcon(thread.priority)}</Text>
-                  </Box>
-                </Box>
-
-                {/* Customer and company info */}
-                <Box marginTop={0} marginLeft={2}>
-                  <Text color="gray">
-                    👤 {thread.customer.fullName} ({thread.customer.email.email})
-                    {thread.customer.company && ` • 🏢 ${thread.customer.company.name}`}
-                  </Text>
-                </Box>
-
-                {/* Assignee */}
-                {thread.assignedToUser && (
-                  <Box marginLeft={2}>
-                    <Text color="gray">
-                      👨‍💼 Assigned to: {thread.assignedToUser.user.publicName}
-                    </Text>
-                  </Box>
-                )}
-
-                {/* Labels */}
-                {thread.labels.length > 0 && (
-                  <Box marginLeft={2}>
-                    <Text color="gray">
-                      🏷️ {thread.labels.map((label) => label.labelType.name).join(', ')}
-                    </Text>
-                  </Box>
-                )}
-
-                {/* Preview text */}
-                {thread.previewText && (
-                  <Box marginLeft={2} marginTop={0}>
-                    <Text color="gray">
-                      💬 {thread.previewText.substring(0, 100)}
-                      {thread.previewText.length > 100 ? '...' : ''}
-                    </Text>
-                  </Box>
-                )}
-
-                {/* Dates */}
-                <Box marginLeft={2} marginTop={0}>
-                  <Text color="gray">
-                    🕐 Updated: {formatDate(thread.updatedAt)}
-                    {' • '}Created: {formatDate(thread.createdAt)}
-                  </Text>
-                </Box>
-              </Box>
-            </Box>
-          ))
-        )}
-      </Box>
-
-      {/* Help */}
-      <Box marginTop={1} borderStyle="round" borderColor="gray" padding={1}>
-        <Text color="green">
-          ↑/↓: Navigate • Enter: View details • F: Filters • R: Refresh • Q: Back
-        </Text>
-      </Box>
     </Box>
+  ))
+
+  return (
+    <Layout
+      title="Threads"
+      subtitle={`${state.threads.length} threads found`}
+      statusText={state.showFilters ? 'Filters Active' : undefined}
+      helpText="↑/↓: Navigate • Enter: View • F: Filters • R: Refresh • Q: Back"
+    >
+      {state.threads.length === 0 ? (
+        <Box flexGrow={1} justifyContent="center" alignItems="center">
+          <Text color="gray">No threads found</Text>
+        </Box>
+      ) : (
+        <ScrollableList selectedIndex={state.selectedIndex} itemHeight={6}>
+          {threadItems}
+        </ScrollableList>
+      )}
+    </Layout>
   )
 }

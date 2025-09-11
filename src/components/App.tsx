@@ -1,4 +1,4 @@
-import { Box, Text, useInput } from 'ink'
+import { Box, Text, useInput, useApp } from 'ink'
 import React, { useEffect, useState } from 'react'
 import { PlainClient } from '../client.js'
 import { CustomersView } from './CustomersView.js'
@@ -18,6 +18,7 @@ interface AppState {
 }
 
 export function App() {
+  const { exit } = useApp()
   const [state, setState] = useState<AppState>({ view: 'home' })
 
   useEffect(() => {
@@ -43,8 +44,15 @@ export function App() {
   }, [])
 
   useInput((input, key) => {
-    if (input === 'q' && state.view !== 'home') {
-      setState((prev) => ({ ...prev, view: 'home' }))
+    // Global keyboard shortcuts
+    if (key.ctrl && input === 'c') {
+      exit()
+    } else if (input === 'q') {
+      if (state.view === 'home') {
+        exit() // Exit app from home screen
+      } else {
+        setState((prev) => ({ ...prev, view: 'home' })) // Go back to home from other views
+      }
     }
   })
 

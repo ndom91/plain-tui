@@ -4,4 +4,8 @@ import React from 'react'
 import { render } from 'ink'
 import { App } from './components/App.js'
 
-render(React.createElement(App))
+// Enable full-screen mode
+render(React.createElement(App), {
+  exitOnCtrlC: false,
+  patchConsole: false,
+})

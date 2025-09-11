@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Box, Text, useInput } from 'ink'
 import type { PlainClient } from '../client.js'
 import type { View } from './App.js'
+import { Layout } from './Layout.js'
 
 interface HomeScreenProps {
   client: PlainClient
@@ -50,52 +51,46 @@ export function HomeScreen({ client, workspace, onNavigate }: HomeScreenProps) {
   })
 
   return (
-    <Box flexDirection="column" padding={1}>
-      {/* Header */}
-      <Box marginBottom={1} borderStyle="round" borderColor="blue" padding={1}>
-        <Box flexDirection="column">
-          <Text color="cyan" bold>
-            ✨ Plain TUI
+    <Layout
+      title="Plain TUI"
+      subtitle={`Connected to ${workspace.name}`}
+      helpText="↑/↓: Navigate • Enter: Select • Letter keys: Quick nav • Q: Quit"
+    >
+      <Box flexDirection="column" padding={2} flexGrow={1}>
+        {/* Menu */}
+        <Box flexDirection="column" flexGrow={1} justifyContent="center">
+          <Text color="yellow" bold marginBottom={2} textAlign="center">
+            📋 Main Menu
           </Text>
-          <Text color="gray">
-            Connected to {workspace.name}
-          </Text>
+
+          {menuItems.map((item, index) => (
+            <Box key={item.key} marginBottom={1} justifyContent="center">
+              <Box width={60}>
+                <Text
+                  color={selectedIndex === index ? 'black' : 'white'}
+                  backgroundColor={selectedIndex === index ? 'cyan' : undefined}
+                >
+                  {selectedIndex === index ? '► ' : '  '}[{item.key.toUpperCase()}] {item.label}
+                </Text>
+                <Text color="gray" marginLeft={2}>
+                  - {item.description}
+                </Text>
+              </Box>
+            </Box>
+          ))}
         </Box>
-      </Box>
 
-      {/* Menu */}
-      <Box flexDirection="column" marginBottom={1}>
-        <Text color="yellow" bold marginBottom={1}>
-          📋 Main Menu
-        </Text>
-
-        {menuItems.map((item, index) => (
-          <Box key={item.key} marginBottom={0}>
-            <Text
-              color={selectedIndex === index ? 'black' : 'white'}
-              backgroundColor={selectedIndex === index ? 'cyan' : undefined}
-            >
-              {selectedIndex === index ? '► ' : '  '}[{item.key.toUpperCase()}] {item.label}
+        {/* Help Section */}
+        <Box marginTop={2} borderStyle="round" borderColor="gray" padding={1}>
+          <Box flexDirection="column">
+            <Text color="green" bold>
+              ⌨️ Keyboard Shortcuts
             </Text>
-            <Text color="gray" marginLeft={1}>
-              - {item.description}
-            </Text>
+            <Text color="gray">↑/↓: Navigate menu • Enter: Select option</Text>
+            <Text color="gray">Letter keys: Quick navigation • Q: Quit • Ctrl+C: Force exit</Text>
           </Box>
-        ))}
-      </Box>
-
-      {/* Help */}
-      <Box borderStyle="round" borderColor="gray" padding={1}>
-        <Box flexDirection="column">
-          <Text color="green" bold>
-            ⌨️ Keyboard Shortcuts
-          </Text>
-          <Text color="gray">↑/↓ : Navigate menu</Text>
-          <Text color="gray">Enter: Select option</Text>
-          <Text color="gray">Letter keys: Quick navigation</Text>
-          <Text color="gray">Q: Go back / Quit</Text>
         </Box>
       </Box>
-    </Box>
+    </Layout>
   )
 }
