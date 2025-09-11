@@ -1,23 +1,34 @@
 {
-	"name": "plain-public-tui",
-	"version": "0.0.1",
-	"description": "TUI for using your favorite customer support tool - Plain",
-	"main": "index.js",
-	"scripts": {
-		"dev": "tsx src/index.ts"
-	},
-	"keywords": [
-		"Plain",
-		"ink",
-		"Customer Support",
-		"tui"
-	],
-	"author": "ndom91 <yo@ndo.dev>",
-	"license": "MIT",
-	"dependencies": {
-		"ink": "^6.3.0"
-	},
-	"devDependencies": {
-		"tsx": "^4.20.5"
-	}
+  "name": "plain-public-tui",
+  "version": "0.0.1",
+  "description": "TUI for using your favorite customer support tool - Plain",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "lint:fix": "biome lint --write",
+    "format:fix": "biome format --write"
+  },
+  "keywords": [
+    "Plain",
+    "ink",
+    "Customer Support",
+    "tui"
+  ],
+  "author": "ndom91 <yo@ndo.dev>",
+  "license": "MIT",
+  "dependencies": {
+    "@types/react": "^19.1.12",
+    "graphql": "^16.11.0",
+    "graphql-request": "^7.2.0",
+    "graphql-tag": "^2.12.6",
+    "ink": "^6.3.0",
+    "react": "^19.1.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.4",
+    "@types/node": "^24.3.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
 }
