@@ -10,7 +10,7 @@ export const GetTenantsQuery = gql`
         node {
           id
           name
-          identifier
+          externalId
           createdAt {
             ...DateTime
           }
