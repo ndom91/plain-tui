@@ -1,31 +1,26 @@
 import { gql } from 'graphql-request'
+import { DateTimeFragment } from './fragments/DateTimeFragment.js'
 
 export const GetThreadsQuery = gql`
-query GetThreads(
-  $filters: ThreadsFilter
-  $sortBy: ThreadsSort
-  $first: Int
-  $after: String
-  $last: Int
-  $before: String
-) {
-  threads(
-    filters: $filters
-    sortBy: $sortBy
-    first: $first
-    after: $after
-    last: $last
-    before: $before
-  ) {
+  ${DateTimeFragment}
+  
+  query GetThreads($filters: ThreadsFilter, $sortBy: ThreadsSort, $first: Int, $after: String) {
+    threads(filters: $filters, sortBy: $sortBy, first: $first, after: $after) {
       edges {
         node {
           id
           title
           status
           priority
-          statusChangedAt
-          updatedAt
-          createdAt
+          statusChangedAt {
+            ...DateTime
+          }
+          updatedAt {
+            ...DateTime
+          }
+          createdAt {
+            ...DateTime
+          }
           customer {
             id
             fullName
@@ -34,13 +29,6 @@ query GetThreads(
             }
             company {
               name
-            }
-          }
-          assignedToUser {
-            user {
-              id
-              fullName
-              publicName
             }
           }
           labels {
@@ -61,6 +49,7 @@ query GetThreads(
         startCursor
         endCursor
       }
+      totalCount
     }
   }
 `

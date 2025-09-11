@@ -24,7 +24,7 @@ export const FullScreen = ({ children }) => {
   }, [])
 
   return (
-    <Box width={size.columns} height={size.rows}>
+    <Box width={size.columns} height={size.rows} display="flex" flexDirection="column">
       {children}
     </Box>
   )

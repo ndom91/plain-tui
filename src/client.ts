@@ -75,10 +75,42 @@ export class PlainClient {
     first?: number
     after?: string
   }) {
-    return this.request(GetThreadsQuery, {
+    const threadsFilter: any = {}
+
+    if (filters?.statuses && filters.statuses.length > 0) {
+      threadsFilter.statuses = filters.statuses
+    }
+
+    if (filters?.assignedToUsers && filters.assignedToUsers.length > 0) {
+      threadsFilter.assignedToUser = filters.assignedToUsers
+    }
+
+    if (filters?.priorities && filters.priorities.length > 0) {
+      threadsFilter.priorities = filters.priorities
+    }
+
+    // Build request variables properly
+    const variables: any = {
       first: filters?.first || 20,
-      after: filters?.after,
-    })
+    }
+
+    // Only add sortBy if we want sorting
+    variables.sortBy = {
+      field: 'STATUS_CHANGED_AT',
+      direction: 'DESC',
+    }
+
+    // Only add filters if we have any
+    if (Object.keys(threadsFilter).length > 0) {
+      variables.filters = threadsFilter
+    }
+
+    // Only add after if provided
+    if (filters?.after) {
+      variables.after = filters.after
+    }
+
+    return this.request(GetThreadsQuery, variables)
   }
 
   // Get customers

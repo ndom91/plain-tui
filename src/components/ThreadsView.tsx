@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
 import { Box, Text, useInput } from 'ink'
+import { useEffect, useState } from 'react'
 import type { PlainClient } from '../client.js'
 import type { View } from './App.js'
 import { Layout } from './Layout.js'
@@ -16,9 +16,15 @@ interface Thread {
   title: string
   status: string
   priority: number
-  statusChangedAt: string
-  updatedAt: string
-  createdAt: string
+  statusChangedAt: {
+    iso8601: string
+  }
+  updatedAt: {
+    iso8601: string
+  }
+  createdAt: {
+    iso8601: string
+  }
   customer: {
     id: string
     fullName: string
@@ -98,6 +104,7 @@ export function ThreadsView({ client, workspace, onNavigate }: ThreadsViewProps)
     }
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     loadThreads()
   }, [state.filters])
@@ -226,7 +233,7 @@ export function ThreadsView({ client, workspace, onNavigate }: ThreadsViewProps)
         {/* Assignee */}
         {thread.assignedToUser && (
           <Box marginLeft={2}>
-            <Text color="gray">👨‍💼 Assigned to: {thread.assignedToUser.user.publicName}</Text>
+            <Text color="gray">👨 Assigned to: {thread.assignedToUser.user.publicName}</Text>
           </Box>
         )}
 
@@ -234,7 +241,7 @@ export function ThreadsView({ client, workspace, onNavigate }: ThreadsViewProps)
         {thread.labels.length > 0 && (
           <Box marginLeft={2}>
             <Text color="gray">
-              🏷️ {thread.labels.map((label) => label.labelType.name).join(', ')}
+              🏷 {thread.labels.map((label) => label.labelType.name).join(', ')}
             </Text>
           </Box>
         )}
@@ -252,8 +259,8 @@ export function ThreadsView({ client, workspace, onNavigate }: ThreadsViewProps)
         {/* Dates */}
         <Box marginLeft={2} marginTop={0}>
           <Text color="gray">
-            🕐 Updated: {formatDate(thread.updatedAt)}
-            {' • '}Created: {formatDate(thread.createdAt)}
+            🕐 Updated: {formatDate(thread.updatedAt.iso8601)}
+            {' • '}Created: {formatDate(thread.createdAt.iso8601)}
           </Text>
         </Box>
       </Box>

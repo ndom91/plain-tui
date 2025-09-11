@@ -5,9 +5,8 @@
   "type": "module",
   "scripts": {
     "dev:og": "tsx src/index.ts",
-    "start": "vite-node -w src/index.tsx",
+    "dev": "vite-node -w src/index.tsx",
     "build": "tsc",
-    "dev": "tsc --watch",
     "lint:fix": "biome lint --write",
     "format:fix": "biome format --write"
   },

@@ -40,16 +40,16 @@ interface ThreadDetail {
       icon?: string
     }
   }>
-  timeline: {
-    edges: Array<{
-      node: {
-        id: string
-        timestamp: string
-        actor: any
-        entry: any
-      }
-    }>
-  }
+  // timeline: {
+  //   edges: Array<{
+  //     node: {
+  //       id: string
+  //       timestamp: string
+  //       actor: any
+  //       entry: any
+  //     }
+  //   }>
+  // }
 }
 
 export function ThreadDetailView({
@@ -152,11 +152,15 @@ export function ThreadDetailView({
                 <Text color="blue">💬 Chat from {actorName}</Text>
                 <Text color="gray">{time}</Text>
               </Box>
-              <Text marginTop={1}>{entry.text}</Text>
+              <Box marginTop={1}>
+                <Text>{entry.text}</Text>
+              </Box>
               {entry.customerReadAt && (
-                <Text color="green" marginTop={1}>
-                  ✓ Read by customer at {formatDate(entry.customerReadAt)}
-                </Text>
+                <Box marginTop={1}>
+                  <Text color="green">
+                    ✓ Read by customer at {formatDate(entry.customerReadAt)}
+                  </Text>
+                </Box>
               )}
             </Box>
           </Box>
@@ -181,7 +185,9 @@ export function ThreadDetailView({
                 )
               </Text>
               {entry.textContent && (
-                <Text marginTop={1}>{entry.textContent.substring(0, 200)}...</Text>
+                <Box marginTop={1}>
+                  <Text>{entry.textContent.substring(0, 200)}...</Text>
+                </Box>
               )}
             </Box>
           </Box>
@@ -201,7 +207,9 @@ export function ThreadDetailView({
                 <Text color="yellow">📝 Note from {actorName}</Text>
                 <Text color="gray">{time}</Text>
               </Box>
-              <Text marginTop={1}>{entry.text}</Text>
+              <Box marginTop={1}>
+                <Text>{entry.text}</Text>
+              </Box>
             </Box>
           </Box>
         )
@@ -260,38 +268,42 @@ export function ThreadDetailView({
           </Text>
 
           {thread.assignedToUser && (
-            <Text marginTop={1}>👨‍💼 Assigned to: {thread.assignedToUser.user.publicName}</Text>
+            <Box marginTop={1}>
+              <Text>👨 Assigned to: {thread.assignedToUser.user.publicName}</Text>
+            </Box>
           )}
 
           {thread.labels.length > 0 && (
-            <Text marginTop={1}>
-              🏷️ Labels: {thread.labels.map((label) => label.labelType.name).join(', ')}
-            </Text>
+            <Box marginTop={1}>
+              <Text>🏷 Labels: {thread.labels.map((label) => label.labelType.name).join(', ')}</Text>
+            </Box>
           )}
 
-          <Text marginTop={1} color="gray">
-            🕐 Created: {formatDate(thread.createdAt)} • Updated: {formatDate(thread.updatedAt)}
-          </Text>
+          <Box marginTop={1}>
+            <Text color="gray">
+              🕐 Created: {formatDate(thread.createdAt)} • Updated: {formatDate(thread.updatedAt)}
+            </Text>
+          </Box>
         </Box>
       </Box>
 
       {/* Timeline */}
-      <Box flexDirection="column" marginBottom={1}>
-        <Text color="yellow" bold marginBottom={1}>
-          📜 Timeline ({thread.timeline.edges.length} entries)
-        </Text>
-
-        <Box flexDirection="column" height={20} overflow="hidden">
-          {thread.timeline.edges.length === 0 ? (
-            <Text color="gray">No timeline entries found</Text>
-          ) : (
-            thread.timeline.edges
-              .slice()
-              .reverse() // Show most recent first
-              .map(({ node }) => renderTimelineEntry(node.entry, node.actor, node.timestamp))
-          )}
-        </Box>
-      </Box>
+      {/* <Box flexDirection="column" marginBottom={1}> */}
+      {/*   <Text color="yellow" bold marginBottom={1}> */}
+      {/*     📜 Timeline ({thread.timeline.edges.length} entries) */}
+      {/*   </Text> */}
+      {/**/}
+      {/*   <Box flexDirection="column" height={20} overflow="hidden"> */}
+      {/*     {thread.timeline.edges.length === 0 ? ( */}
+      {/*       <Text color="gray">No timeline entries found</Text> */}
+      {/*     ) : ( */}
+      {/*       thread.timeline.edges */}
+      {/*         .slice() */}
+      {/*         .reverse() // Show most recent first */}
+      {/*         .map(({ node }) => renderTimelineEntry(node.entry, node.actor, node.timestamp)) */}
+      {/*     )} */}
+      {/*   </Box> */}
+      {/* </Box> */}
 
       {/* Help */}
       <Box borderStyle="round" borderColor="gray" padding={1}>
