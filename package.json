@@ -1,0 +1,23 @@
+{
+	"name": "plain-public-tui",
+	"version": "0.0.1",
+	"description": "TUI for using your favorite customer support tool - Plain",
+	"main": "index.js",
+	"scripts": {
+		"dev": "tsx src/index.ts"
+	},
+	"keywords": [
+		"Plain",
+		"ink",
+		"Customer Support",
+		"tui"
+	],
+	"author": "ndom91 <yo@ndo.dev>",
+	"license": "MIT",
+	"dependencies": {
+		"ink": "^6.3.0"
+	},
+	"devDependencies": {
+		"tsx": "^4.20.5"
+	}
+}
