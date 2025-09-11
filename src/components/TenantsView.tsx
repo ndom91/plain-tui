@@ -1,23 +1,17 @@
-import React, { useState, useEffect } from 'react'
 import { Box, Text, useInput } from 'ink'
+import { useEffect, useState } from 'react'
 import type { PlainClient } from '../client.js'
+import type { SimpleTenant as Tenant } from '../types/compatibility.js'
+import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
 
 interface TenantsViewProps {
   client: PlainClient
-  workspace: any
+  workspace: Workspace
   onNavigate: (view: View) => void
 }
 
-interface Tenant {
-  id: string
-  name: string
-  identifier: string
-  createdAt: string
-  updatedAt: string
-}
-
-export function TenantsView({ client, workspace, onNavigate }: TenantsViewProps) {
+export function TenantsView({ client, onNavigate }: TenantsViewProps) {
   const [tenants, setTenants] = useState<Tenant[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -41,9 +35,9 @@ export function TenantsView({ client, workspace, onNavigate }: TenantsViewProps)
   useInput((input, key) => {
     if (input === 'q') {
       onNavigate('home')
-    } else if (key.upArrow && tenants.length > 0) {
+    } else if ((key.upArrow || input === 'k') && tenants.length > 0) {
       setSelectedIndex((prev) => Math.max(0, prev - 1))
-    } else if (key.downArrow && tenants.length > 0) {
+    } else if ((key.downArrow || input === 'j') && tenants.length > 0) {
       setSelectedIndex((prev) => Math.min(tenants.length - 1, prev + 1))
     }
   })
@@ -115,7 +109,7 @@ export function TenantsView({ client, workspace, onNavigate }: TenantsViewProps)
 
       {/* Help */}
       <Box marginTop={1} borderStyle="round" borderColor="gray" padding={1}>
-        <Text color="green">↑/↓: Navigate • Q: Back</Text>
+        <Text color="green">↑/↓/j/k: Navigate • Q: Back</Text>
       </Box>
     </Box>
   )

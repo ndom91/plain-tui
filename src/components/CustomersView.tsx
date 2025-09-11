@@ -1,35 +1,19 @@
-import React, { useState, useEffect } from 'react'
 import { Box, Text, useInput } from 'ink'
+import { useEffect, useState } from 'react'
 import type { PlainClient } from '../client.js'
+import type { SimpleCustomer as Customer } from '../types/compatibility.js'
+import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
 import { Layout } from './Layout.js'
 import { ScrollableList } from './ScrollableList.js'
 
 interface CustomersViewProps {
   client: PlainClient
-  workspace: any
+  workspace: Workspace
   onNavigate: (view: View) => void
 }
 
-interface Customer {
-  id: string
-  fullName: string
-  shortName?: string
-  email: {
-    email: string
-    isVerified: boolean
-  }
-  avatarUrl?: string
-  company?: {
-    id: string
-    name: string
-  }
-  status: string
-  createdAt: string
-  updatedAt: string
-}
-
-export function CustomersView({ client, workspace, onNavigate }: CustomersViewProps) {
+export function CustomersView({ client, onNavigate }: CustomersViewProps) {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -53,9 +37,9 @@ export function CustomersView({ client, workspace, onNavigate }: CustomersViewPr
   useInput((input, key) => {
     if (input === 'q') {
       onNavigate('home')
-    } else if (key.upArrow && customers.length > 0) {
+    } else if ((key.upArrow || input === 'k') && customers.length > 0) {
       setSelectedIndex((prev) => Math.max(0, prev - 1))
-    } else if (key.downArrow && customers.length > 0) {
+    } else if ((key.downArrow || input === 'j') && customers.length > 0) {
       setSelectedIndex((prev) => Math.min(customers.length - 1, prev + 1))
     }
   })
@@ -116,7 +100,7 @@ export function CustomersView({ client, workspace, onNavigate }: CustomersViewPr
     <Layout
       title="Customers"
       subtitle={`${customers.length} customers found`}
-      helpText="↑/↓: Navigate • Q: Back"
+      helpText="↑/↓/j/k: Navigate • Q: Back"
     >
       {customers.length === 0 ? (
         <Box flexGrow={1} justifyContent="center" alignItems="center">

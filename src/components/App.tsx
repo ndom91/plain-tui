@@ -2,6 +2,7 @@ import { Box, Text, useApp, useInput } from 'ink'
 import type React from 'react'
 import { useEffect, useState } from 'react'
 import { PlainClient } from '../client.js'
+import type { Workspace } from '../types/plain.js'
 import { CustomersView } from './CustomersView.js'
 import { HomeScreen } from './HomeScreen.js'
 import { TenantsView } from './TenantsView.js'
@@ -14,7 +15,7 @@ interface AppState {
   view: View
   selectedThreadId?: string
   client?: PlainClient
-  workspace?: any
+  workspace?: Workspace
   error?: string
 }
 

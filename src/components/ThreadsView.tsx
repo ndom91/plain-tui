@@ -1,53 +1,19 @@
 import { Box, Text, useInput } from 'ink'
 import { useEffect, useState } from 'react'
 import type { PlainClient } from '../client.js'
+import type { Workspace } from '../types/plain.js'
+import type { SimpleThread as Thread } from '../types/compatibility.js'
 import type { View } from './App.js'
 import { Layout } from './Layout.js'
 import { ScrollableList } from './ScrollableList.js'
 
 interface ThreadsViewProps {
   client: PlainClient
-  workspace: any
+  workspace: Workspace
   onNavigate: (view: View, threadId?: string) => void
 }
 
-interface Thread {
-  id: string
-  title: string
-  status: string
-  priority: number
-  statusChangedAt: {
-    iso8601: string
-  }
-  updatedAt: {
-    iso8601: string
-  }
-  createdAt: {
-    iso8601: string
-  }
-  customer: {
-    id: string
-    fullName: string
-    email: { email: string }
-    company?: { name: string }
-  }
-  assignedToUser?: {
-    user: {
-      id: string
-      fullName: string
-      publicName: string
-    }
-  }
-  labels: Array<{
-    id: string
-    labelType: {
-      name: string
-      color: string
-      icon?: string
-    }
-  }>
-  previewText?: string
-}
+// Thread interface imported from compatibility layer
 
 interface ThreadsState {
   threads: Thread[]
@@ -65,7 +31,7 @@ interface ThreadsState {
 const statusOptions = ['TODO', 'SNOOZED', 'DONE']
 const priorityOptions = [0, 1, 2, 3, 4]
 
-export function ThreadsView({ client, workspace, onNavigate }: ThreadsViewProps) {
+export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
   const [state, setState] = useState<ThreadsState>({
     threads: [],
     loading: true,
@@ -104,7 +70,7 @@ export function ThreadsView({ client, workspace, onNavigate }: ThreadsViewProps)
     }
   }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: loadThreads will change on every render
   useEffect(() => {
     loadThreads()
   }, [state.filters])
@@ -123,12 +89,12 @@ export function ThreadsView({ client, workspace, onNavigate }: ThreadsViewProps)
       setState((prev) => ({ ...prev, showFilters: !prev.showFilters }))
     } else if (input === 'r') {
       loadThreads()
-    } else if (key.upArrow && state.threads.length > 0) {
+    } else if ((key.upArrow || input === 'k') && state.threads.length > 0) {
       setState((prev) => ({
         ...prev,
         selectedIndex: Math.max(0, prev.selectedIndex - 1),
       }))
-    } else if (key.downArrow && state.threads.length > 0) {
+    } else if ((key.downArrow || input === 'j') && state.threads.length > 0) {
       setState((prev) => ({
         ...prev,
         selectedIndex: Math.min(prev.threads.length - 1, prev.selectedIndex + 1),
@@ -272,14 +238,14 @@ export function ThreadsView({ client, workspace, onNavigate }: ThreadsViewProps)
       title="Threads"
       subtitle={`${state.threads.length} threads found`}
       statusText={state.showFilters ? 'Filters Active' : undefined}
-      helpText="↑/↓: Navigate • Enter: View • F: Filters • R: Refresh • Q: Back"
+      helpText="↑/↓/j/k: Navigate • Enter: View • F: Filters • R: Refresh • Q: Back"
     >
       {state.threads.length === 0 ? (
         <Box flexGrow={1} justifyContent="center" alignItems="center">
           <Text color="gray">No threads found</Text>
         </Box>
       ) : (
-        <ScrollableList selectedIndex={state.selectedIndex} itemHeight={6}>
+        <ScrollableList selectedIndex={state.selectedIndex} itemHeight={2}>
           {threadItems}
         </ScrollableList>
       )}

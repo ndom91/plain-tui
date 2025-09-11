@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react'
 import { Box, Text, useInput } from 'ink'
+import { useEffect, useState } from 'react'
 import type { PlainClient } from '../client.js'
+import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
 
 interface ThreadDetailViewProps {
   client: PlainClient
-  workspace: any
+  workspace: Workspace
   threadId: string
   onNavigate: (view: View) => void
 }
@@ -54,7 +55,7 @@ interface ThreadDetail {
 
 export function ThreadDetailView({
   client,
-  workspace,
+  workspace: _workspace,
   threadId,
   onNavigate,
 }: ThreadDetailViewProps) {
@@ -77,7 +78,7 @@ export function ThreadDetailView({
     loadThreadDetail()
   }, [client, threadId])
 
-  useInput((input, key) => {
+  useInput((input, _key) => {
     if (input === 'q') {
       onNavigate('threads')
     }
