@@ -226,9 +226,7 @@ export function ThreadsView({ client, workspace, onNavigate }: ThreadsViewProps)
         {/* Assignee */}
         {thread.assignedToUser && (
           <Box marginLeft={2}>
-            <Text color="gray">
-              👨‍💼 Assigned to: {thread.assignedToUser.user.publicName}
-            </Text>
+            <Text color="gray">👨‍💼 Assigned to: {thread.assignedToUser.user.publicName}</Text>
           </Box>
         )}
 

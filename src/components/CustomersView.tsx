@@ -106,9 +106,7 @@ export function CustomersView({ client, workspace, onNavigate }: CustomersViewPr
         </Box>
 
         <Box marginLeft={2}>
-          <Text color="gray">
-            🕐 Created: {new Date(customer.createdAt).toLocaleDateString()}
-          </Text>
+          <Text color="gray">🕐 Created: {new Date(customer.createdAt).toLocaleDateString()}</Text>
         </Box>
       </Box>
     </Box>

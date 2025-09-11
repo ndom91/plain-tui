@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, Text } from 'ink'
-import useStdoutDimensions from 'ink-use-stdout-dimensions'
+import { FullScreen } from './FullScreen'
 
 interface ScrollableListProps {
   children: React.ReactNode[]
@@ -8,29 +8,23 @@ interface ScrollableListProps {
   itemHeight?: number
 }
 
-export function ScrollableList({ 
-  children, 
-  selectedIndex, 
-  itemHeight = 1 
-}: ScrollableListProps) {
-  const [width, height] = useStdoutDimensions()
-  
+export function ScrollableList({ children, selectedIndex, itemHeight = 1 }: ScrollableListProps) {
   // Available height for content (accounting for header, footer, padding)
-  const availableHeight = Math.max(height - 6, 10)
-  const maxVisibleItems = Math.floor(availableHeight / itemHeight)
-  
+  // const availableHeight = Math.max(height - 6, 10)
+  const maxVisibleItems = Math.floor(200 / itemHeight)
+
   // Calculate scroll position
   let startIndex = 0
   if (children.length > maxVisibleItems) {
     startIndex = Math.max(0, selectedIndex - Math.floor(maxVisibleItems / 2))
     startIndex = Math.min(startIndex, children.length - maxVisibleItems)
   }
-  
+
   const visibleItems = children.slice(startIndex, startIndex + maxVisibleItems)
   const showScrollIndicators = children.length > maxVisibleItems
-  
+
   return (
-    <Box flexDirection="column" width={width}>
+    <FullScreen>
       {/* Scroll up indicator */}
       {showScrollIndicators && startIndex > 0 && (
         <Box justifyContent="center" marginBottom={1}>
@@ -39,20 +33,22 @@ export function ScrollableList({
           </Box>
         </Box>
       )}
-      
+
       {/* Visible items */}
       <Box flexDirection="column" flexGrow={1}>
         {visibleItems}
       </Box>
-      
+
       {/* Scroll down indicator */}
       {showScrollIndicators && startIndex + maxVisibleItems < children.length && (
         <Box justifyContent="center" marginTop={1}>
           <Box borderStyle="round" borderColor="gray" paddingX={2}>
-            <Text color="gray">↓ {children.length - startIndex - maxVisibleItems} more items below</Text>
+            <Text color="gray">
+              ↓ {children.length - startIndex - maxVisibleItems} more items below
+            </Text>
           </Box>
         </Box>
       )}
-    </Box>
+    </FullScreen>
   )
 }

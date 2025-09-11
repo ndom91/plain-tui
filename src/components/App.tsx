@@ -1,5 +1,6 @@
-import { Box, Text, useInput, useApp } from 'ink'
-import React, { useEffect, useState } from 'react'
+import { Box, Text, useApp, useInput } from 'ink'
+import type React from 'react'
+import { useEffect, useState } from 'react'
 import { PlainClient } from '../client.js'
 import { CustomersView } from './CustomersView.js'
 import { HomeScreen } from './HomeScreen.js'
@@ -17,7 +18,7 @@ interface AppState {
   error?: string
 }
 
-export function App() {
+export function App(): React.ReactNode {
   const { exit } = useApp()
   const [state, setState] = useState<AppState>({ view: 'home' })
 

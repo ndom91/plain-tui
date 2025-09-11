@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, Text } from 'ink'
-import useStdoutDimensions from 'ink-use-stdout-dimensions'
+import { FullScreen } from './FullScreen.js'
 
 interface LayoutProps {
   title: string
@@ -11,19 +11,10 @@ interface LayoutProps {
 }
 
 export function Layout({ title, subtitle, statusText, helpText, children }: LayoutProps) {
-  const [width, height] = useStdoutDimensions()
-
   return (
-    <Box flexDirection="column" width={width} height={height}>
+    <FullScreen>
       {/* Header */}
-      <Box
-        borderStyle="round"
-        borderColor="cyan"
-        paddingX={2}
-        paddingY={0}
-        width={width}
-        justifyContent="space-between"
-      >
+      <Box paddingX={2} paddingY={0} justifyContent="space-between">
         <Box flexDirection="column">
           <Text color="cyan" bold>
             ✨ {title}
@@ -42,25 +33,12 @@ export function Layout({ title, subtitle, statusText, helpText, children }: Layo
       </Box>
 
       {/* Main content area */}
-      <Box
-        flexDirection="column" 
-        flexGrow={1}
-        width={width}
-        height={height - 4} // Account for header and footer
-        overflow="hidden"
-      >
+      <Box flexDirection="column" flexGrow={1} overflow="hidden">
         {children}
       </Box>
 
       {/* Footer/Status bar */}
-      <Box
-        borderStyle="round"
-        borderColor="gray"
-        paddingX={2}
-        paddingY={0}
-        width={width}
-        justifyContent="space-between"
-      >
+      <Box paddingX={2} paddingY={0} justifyContent="space-between">
         <Box>
           <Text color="green" bold>
             Plain TUI
@@ -74,6 +52,6 @@ export function Layout({ title, subtitle, statusText, helpText, children }: Layo
           )}
         </Box>
       </Box>
-    </Box>
+    </FullScreen>
   )
 }
