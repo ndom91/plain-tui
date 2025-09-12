@@ -10,7 +10,9 @@ interface ScrollableListProps {
 
 export function ScrollableList({ children, selectedIndex, itemHeight = 1 }: ScrollableListProps) {
   const [_columns, rows] = useStdoutDimensions()
-  const maxVisibleItems = Math.floor(rows / itemHeight)
+  // Account for header (2 rows) and footer (1 row) space used by Layout component  
+  const availableRows = Math.max(1, rows - 4)
+  const maxVisibleItems = Math.floor(availableRows / itemHeight)
 
   let startIndex = 0
   if (children.length > maxVisibleItems) {

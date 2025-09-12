@@ -1,18 +1,16 @@
 #!/usr/bin/env node
 
 import React from 'react'
-import { render, RenderOptions } from 'ink'
+import { render } from 'ink'
 import { App } from './components/App.js'
 
-export const RenderFullScreen = (element: React.ReactNode, options?: RenderOptions) => {
-  process.stdout.write('\x1b[?1049h')
-  const instance = render(<App>{element}</App>, options)
-  void instance.waitUntilExit().then(() => process.stdout.write('\x1b[?1049l'))
-  return instance
-}
+// Enable alternate screen buffer for full-screen mode
+process.stdout.write('\x1b[?1049h')
 
-// Enable full-screen mode
-render(<RenderFullScreen />, {
+const instance = render(<App />, {
   exitOnCtrlC: false,
   patchConsole: false,
 })
+
+// Restore original screen buffer when exiting
+void instance.waitUntilExit().then(() => process.stdout.write('\x1b[?1049l'))

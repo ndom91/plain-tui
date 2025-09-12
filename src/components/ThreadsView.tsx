@@ -1,10 +1,11 @@
 import { Box, Text, useInput } from 'ink'
 import { useEffect, useState } from 'react'
 import type { PlainClient } from '../client.js'
-import type { Workspace } from '../types/plain.js'
 import type { SimpleThread as Thread } from '../types/compatibility.js'
+import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
 import { Layout } from './Layout.js'
+import { LoadingSpinner } from './LoadingSpinner.js'
 import { ScrollableList } from './ScrollableList.js'
 
 interface ThreadsViewProps {
@@ -136,8 +137,8 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
 
   if (state.loading) {
     return (
-      <Box padding={1}>
-        <Text>Loading threads...</Text>
+      <Box margin={1}>
+        <LoadingSpinner text="Loading threads..." />
       </Box>
     )
   }
@@ -174,7 +175,6 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
       marginBottom={1}
     >
       <Box flexDirection="column" width="100%">
-        {/* Main thread info */}
         <Box justifyContent="space-between">
           <Box>
             <Text color={index === state.selectedIndex ? 'cyan' : 'white'} bold>
@@ -188,7 +188,6 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
           </Box>
         </Box>
 
-        {/* Customer and company info */}
         <Box marginTop={0} marginLeft={2}>
           <Text color="gray">
             👤 {thread.customer.fullName} ({thread.customer.email.email})
@@ -196,14 +195,12 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
           </Text>
         </Box>
 
-        {/* Assignee */}
         {thread.assignedToUser && (
           <Box marginLeft={2}>
             <Text color="gray">👨 Assigned to: {thread.assignedToUser.user.publicName}</Text>
           </Box>
         )}
 
-        {/* Labels */}
         {thread.labels.length > 0 && (
           <Box marginLeft={2}>
             <Text color="gray">
@@ -212,7 +209,6 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
           </Box>
         )}
 
-        {/* Preview text */}
         {thread.previewText && (
           <Box marginLeft={2} marginTop={0}>
             <Text color="gray">
@@ -222,7 +218,6 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
           </Box>
         )}
 
-        {/* Dates */}
         <Box marginLeft={2} marginTop={0}>
           <Text color="gray">
             🕐 Updated: {formatDate(thread.updatedAt.iso8601)}

@@ -56,13 +56,41 @@ interface TenantsResponse {
 
 interface ThreadDetailsResponse {
   thread: Thread & {
-    timelineEntries: Connection<TimelineEntry[]> // Timeline entries
+    timelineEntries: Connection<TimelineEntry[]>
   }
 }
 
 export class PlainClient {
   private client: GraphQLClient
   private config: PlainConfig
+
+  // biome-ignore lint/suspicious/noExplicitAny: API Response
+  private transformTimestamps<T extends Record<string, any>>(obj: T): T {
+    const transformed = { ...obj }
+
+    if (obj.createdAt && typeof obj.createdAt === 'object' && obj.createdAt.iso8601) {
+      transformed.createdAt = obj.createdAt.iso8601
+    }
+
+    if (obj.updatedAt && typeof obj.updatedAt === 'object' && obj.updatedAt.iso8601) {
+      transformed.updatedAt = obj.updatedAt.iso8601
+    }
+
+    return transformed
+  }
+
+  // biome-ignore lint/suspicious/noExplicitAny: API Response
+  private transformConnection<T extends Record<string, any>>(
+    connection: Connection<T>
+  ): Connection<T> {
+    return {
+      ...connection,
+      edges: connection.edges.map((edge) => ({
+        ...edge,
+        node: this.transformTimestamps(edge.node),
+      })),
+    }
+  }
 
   constructor() {
     this.config = this.loadConfig()
@@ -161,10 +189,15 @@ export class PlainClient {
 
   // Get tenants
   async getTenants(filters?: PaginationFilters): Promise<TenantsResponse> {
-    return this.request<TenantsResponse>(GetTenantsQuery, {
+    const response = await this.request<TenantsResponse>(GetTenantsQuery, {
       first: filters?.first || 20,
       after: filters?.after,
     })
+
+    return {
+      ...response,
+      tenants: this.transformConnection(response.tenants),
+    }
   }
 
   // Get thread details with timeline

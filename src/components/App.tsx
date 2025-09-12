@@ -5,6 +5,7 @@ import { PlainClient } from '../client.js'
 import type { Workspace } from '../types/plain.js'
 import { CustomersView } from './CustomersView.js'
 import { HomeScreen } from './HomeScreen.js'
+import { LoadingSpinner } from './LoadingSpinner.js'
 import { TenantsView } from './TenantsView.js'
 import { ThreadDetailView } from './ThreadDetailView.js'
 import { ThreadsView } from './ThreadsView.js'
@@ -49,9 +50,11 @@ export function App(): React.ReactNode {
     // Global keyboard shortcuts
     if (key.ctrl && input === 'c') {
       exit()
+      process.exit(0)
     } else if (input === 'q') {
       if (state.view === 'home') {
         exit() // Exit app from home screen
+        process.exit(0)
       } else {
         setState((prev) => ({ ...prev, view: 'home' })) // Go back to home from other views
       }
@@ -81,11 +84,7 @@ export function App(): React.ReactNode {
   }
 
   if (!state.client || !state.workspace) {
-    return (
-      <Box padding={1}>
-        <Text>Loading...</Text>
-      </Box>
-    )
+    return <LoadingSpinner text="Connecting to Plain..." />
   }
 
   const commonProps = {

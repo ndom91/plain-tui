@@ -52,15 +52,22 @@ export function HomeScreen({ workspace, onNavigate }: HomeScreenProps) {
 
   return (
     <Layout
-      title="Plain TUI"
-      subtitle={`📶 Connected to ${workspace.name}`}
+      title={`Plain (${workspace.name})`}
       helpText="↑/↓/j/k: Navigate • Enter: Select • Letter keys: Quick nav • Q: Quit"
     >
       <Box flexDirection="column" padding={2} flexGrow={1}>
-        <Box flexDirection="column" marginBottom={2} flexGrow={1} justifyContent="center">
-          <Text color="yellow" bold>
-            Main Menu
-          </Text>
+        <Box
+          flexDirection="column"
+          marginBottom={2}
+          flexGrow={1}
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Box width={60} marginBottom={2}>
+            <Text color="yellow" bold>
+              Main Menu
+            </Text>
+          </Box>
 
           {menuItems.map((item, index) => (
             <Box key={item.key} marginBottom={1} justifyContent="center">

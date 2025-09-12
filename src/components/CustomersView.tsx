@@ -5,6 +5,7 @@ import type { SimpleCustomer as Customer } from '../types/compatibility.js'
 import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
 import { Layout } from './Layout.js'
+import { LoadingSpinner } from './LoadingSpinner.js'
 import { ScrollableList } from './ScrollableList.js'
 
 interface CustomersViewProps {
@@ -46,8 +47,8 @@ export function CustomersView({ client, onNavigate }: CustomersViewProps) {
 
   if (loading) {
     return (
-      <Box padding={1}>
-        <Text>Loading customers...</Text>
+      <Box margin={1}>
+        <LoadingSpinner text="Loading customers..." />
       </Box>
     )
   }

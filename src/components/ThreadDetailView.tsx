@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import type { PlainClient } from '../client.js'
 import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
+import { LoadingSpinner } from './LoadingSpinner.js'
 
 interface ThreadDetailViewProps {
   client: PlainClient
@@ -86,8 +87,8 @@ export function ThreadDetailView({
 
   if (loading) {
     return (
-      <Box padding={1}>
-        <Text>Loading thread details...</Text>
+      <Box margin={1}>
+        <LoadingSpinner text="Loading thread details..." />
       </Box>
     )
   }

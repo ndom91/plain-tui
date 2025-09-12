@@ -14,7 +14,7 @@ export function Layout({ title, subtitle, statusText, helpText, children }: Layo
     <FullScreen>
       {/* Header */}
       <Box paddingX={2} paddingY={0} justifyContent="space-between">
-        <Box flexDirection="column">
+        <Box flexDirection="column" marginTop={1}>
           <Text color="cyan" bold>
             ✨ {title}
           </Text>
