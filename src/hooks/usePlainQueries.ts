@@ -8,6 +8,7 @@ export const queryKeys = {
   customers: (filters?: PaginationFilters) => ['customers', filters],
   tenants: (filters?: PaginationFilters) => ['tenants', filters],
   threadDetails: (threadId: string) => ['thread-details', threadId],
+  timelineEvents: (threadId: string, filters?: PaginationFilters) => ['timeline-events', threadId, filters],
 }
 
 // Workspace query hook
@@ -56,6 +57,16 @@ export function useThreadDetails(client: PlainClient, threadId: string) {
   })
 }
 
+// Timeline events query hook
+export function useTimelineEvents(client: PlainClient, threadId: string, filters?: PaginationFilters) {
+  return useQuery({
+    queryKey: queryKeys.timelineEvents(threadId, filters),
+    queryFn: () => client.getTimelineEvents(threadId, filters),
+    staleTime: 30 * 1000, // 30 seconds for timeline events (more dynamic)
+    enabled: !!threadId, // Only run if threadId exists
+  })
+}
+
 // Hook to manually refresh all queries
 export function useRefreshQueries() {
   const queryClient = useQueryClient()
@@ -71,5 +82,7 @@ export function useRefreshQueries() {
       queryClient.invalidateQueries({ queryKey: queryKeys.tenants(filters) }),
     refreshThreadDetails: (threadId: string) => 
       queryClient.invalidateQueries({ queryKey: queryKeys.threadDetails(threadId) }),
+    refreshTimelineEvents: (threadId: string, filters?: PaginationFilters) => 
+      queryClient.invalidateQueries({ queryKey: queryKeys.timelineEvents(threadId, filters) }),
   }
 }

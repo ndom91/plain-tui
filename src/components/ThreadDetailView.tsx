@@ -1,6 +1,6 @@
 import { Box, Text, useInput } from 'ink'
 import type { PlainClient } from '../client.js'
-import { useRefreshQueries, useThreadDetails } from '../hooks/usePlainQueries.js'
+import { useRefreshQueries, useThreadDetails, useTimelineEvents } from '../hooks/usePlainQueries.js'
 import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
 import { Layout } from './Layout.js'
@@ -61,22 +61,31 @@ export function ThreadDetailView({
   threadId,
   onNavigate,
 }: ThreadDetailViewProps) {
-  const { refreshThreadDetails } = useRefreshQueries()
+  const { refreshThreadDetails, refreshTimelineEvents } = useRefreshQueries()
   const { data: threadData, isLoading, error, isFetching } = useThreadDetails(client, threadId)
+  const { 
+    data: timelineData, 
+    isLoading: timelineLoading, 
+    error: timelineError, 
+    isFetching: timelineFetching 
+  } = useTimelineEvents(client, threadId)
+  
   const thread = threadData?.thread
+  const timeline = timelineData?.thread?.timelineEntries
 
   useInput((input, key) => {
     if (input === 'q' || key.escape) {
       onNavigate('threads')
     } else if (input === 'r') {
       refreshThreadDetails(threadId)
+      refreshTimelineEvents(threadId)
     }
   })
 
-  if (isLoading) {
+  if (isLoading || timelineLoading) {
     return (
       <Box margin={1}>
-        <LoadingSpinner text="Loading thread details..." />
+        <LoadingSpinner text={isLoading ? "Loading thread details..." : "Loading timeline events..."} />
       </Box>
     )
   }
@@ -86,6 +95,17 @@ export function ThreadDetailView({
       <Box flexDirection="column" padding={1}>
         <Text color="red">
           ❌ Error: {error instanceof Error ? error.message : 'Thread not found'}
+        </Text>
+        <Text color="gray">Press 'r' to retry or 'q' to go back</Text>
+      </Box>
+    )
+  }
+
+  if (timelineError && !timeline) {
+    return (
+      <Box flexDirection="column" padding={1}>
+        <Text color="red">
+          ❌ Timeline Error: {timelineError instanceof Error ? timelineError.message : 'Timeline not found'}
         </Text>
         <Text color="gray">Press 'r' to retry or 'q' to go back</Text>
       </Box>
@@ -119,13 +139,17 @@ export function ThreadDetailView({
     )
   }
 
-  const renderTimelineEntry = (entry: any, actor: any, timestamp: string) => {
+  const renderTimelineEntry = (entry: any, actor: any, timestamp: string, index: number) => {
     const actorName =
       actor.__typename === 'UserActor'
         ? actor.user.publicName
         : actor.__typename === 'CustomerActor'
           ? actor.customer.fullName
-          : 'System'
+          : actor.__typename === 'MachineUserActor'
+          ? actor.machineUser.publicName
+          : actor.__typename === 'SystemActor'
+          ? 'System'
+          : 'Unknown'
 
     const time = formatDate(timestamp)
 
@@ -133,7 +157,7 @@ export function ThreadDetailView({
       case 'ChatEntry':
         return (
           <Box
-            key={`${timestamp}-chat`}
+            key={`${index}-chat-${entry.chatId}`}
             marginBottom={1}
             borderStyle="round"
             borderColor="blue"
@@ -145,13 +169,18 @@ export function ThreadDetailView({
                 <Text color="gray">{time}</Text>
               </Box>
               <Box marginTop={1}>
-                <Text>{entry.text}</Text>
+                <Text>{entry.text || '(no text)'}</Text>
               </Box>
               {entry.customerReadAt && (
                 <Box marginTop={1}>
                   <Text color="green">
-                    ✓ Read by customer at {formatDate(entry.customerReadAt)}
+                    ✓ Read by customer at {formatDate(entry.customerReadAt.iso8601)}
                   </Text>
+                </Box>
+              )}
+              {entry.attachments && entry.attachments.length > 0 && (
+                <Box marginTop={1}>
+                  <Text color="cyan">📎 {entry.attachments.length} attachment(s)</Text>
                 </Box>
               )}
             </Box>
@@ -161,7 +190,7 @@ export function ThreadDetailView({
       case 'EmailEntry':
         return (
           <Box
-            key={`${timestamp}-email`}
+            key={`${index}-email-${entry.emailId}`}
             marginBottom={1}
             borderStyle="round"
             borderColor="green"
@@ -169,16 +198,27 @@ export function ThreadDetailView({
           >
             <Box flexDirection="column">
               <Box justifyContent="space-between">
-                <Text color="green">📧 Email: {entry.subject}</Text>
+                <Text color="green">📧 Email: {entry.subject || '(no subject)'}</Text>
                 <Text color="gray">{time}</Text>
               </Box>
               <Text color="gray">
-                From: {entry.from.name} ({entry.from.email}) → To: {entry.to.name} ({entry.to.email}
-                )
+                From: {entry.from.name || entry.from.email} ({entry.from.email}) → To: {entry.to.name || entry.to.email} ({entry.to.email})
               </Text>
               {entry.textContent && (
                 <Box marginTop={1}>
                   <Text>{entry.textContent.substring(0, 200)}...</Text>
+                </Box>
+              )}
+              {entry.sendStatus && (
+                <Box marginTop={1}>
+                  <Text color={entry.sendStatus === 'SENT' ? 'green' : entry.sendStatus === 'FAILED' ? 'red' : 'yellow'}>
+                    Status: {entry.sendStatus}
+                  </Text>
+                </Box>
+              )}
+              {entry.attachments && entry.attachments.length > 0 && (
+                <Box marginTop={1}>
+                  <Text color="cyan">📎 {entry.attachments.length} attachment(s)</Text>
                 </Box>
               )}
             </Box>
@@ -188,7 +228,7 @@ export function ThreadDetailView({
       case 'NoteEntry':
         return (
           <Box
-            key={`${timestamp}-note`}
+            key={`${index}-note-${entry.noteId}`}
             marginBottom={1}
             borderStyle="round"
             borderColor="yellow"
@@ -202,6 +242,110 @@ export function ThreadDetailView({
               <Box marginTop={1}>
                 <Text>{entry.text}</Text>
               </Box>
+              {entry.attachments && entry.attachments.length > 0 && (
+                <Box marginTop={1}>
+                  <Text color="cyan">📎 {entry.attachments.length} attachment(s)</Text>
+                </Box>
+              )}
+            </Box>
+          </Box>
+        )
+
+      case 'SlackMessageEntry':
+        return (
+          <Box
+            key={`${index}-slack-${entry.slackMessageLink}`}
+            marginBottom={1}
+            borderStyle="round"
+            borderColor="magenta"
+            padding={1}
+          >
+            <Box flexDirection="column">
+              <Box justifyContent="space-between">
+                <Text color="magenta">💬 Slack message from {actorName}</Text>
+                <Text color="gray">{time}</Text>
+              </Box>
+              <Box marginTop={1}>
+                <Text>{entry.text}</Text>
+              </Box>
+              {entry.reactions && entry.reactions.length > 0 && (
+                <Box marginTop={1}>
+                  <Text color="cyan">
+                    Reactions: {entry.reactions.map((r: any) => r.name).join(' ')}
+                  </Text>
+                </Box>
+              )}
+            </Box>
+          </Box>
+        )
+
+      case 'SlackReplyEntry':
+        return (
+          <Box
+            key={`${index}-slack-reply-${entry.slackMessageLink}`}
+            marginBottom={1}
+            borderStyle="round"
+            borderColor="magenta"
+            padding={1}
+          >
+            <Box flexDirection="column">
+              <Box justifyContent="space-between">
+                <Text color="magenta">↪️ Slack reply from {actorName}</Text>
+                <Text color="gray">{time}</Text>
+              </Box>
+              <Box marginTop={1}>
+                <Text>{entry.text}</Text>
+              </Box>
+            </Box>
+          </Box>
+        )
+
+      case 'ThreadEventEntry':
+        return (
+          <Box
+            key={`${index}-thread-event-${entry.timelineEventId}`}
+            marginBottom={1}
+            borderStyle="round"
+            borderColor="cyan"
+            padding={1}
+          >
+            <Box justifyContent="space-between">
+              <Text color="cyan">🎯 {entry.title}</Text>
+              <Text color="gray">{time}</Text>
+            </Box>
+          </Box>
+        )
+
+      case 'CustomerEventEntry':
+        return (
+          <Box
+            key={`${index}-customer-event-${entry.timelineEventId}`}
+            marginBottom={1}
+            borderStyle="round"
+            borderColor="blue"
+            padding={1}
+          >
+            <Box justifyContent="space-between">
+              <Text color="blue">👤 {entry.title}</Text>
+              <Text color="gray">{time}</Text>
+            </Box>
+          </Box>
+        )
+
+      case 'CustomEntry':
+        return (
+          <Box
+            key={`${index}-custom-${entry.externalId || 'no-id'}`}
+            marginBottom={1}
+            borderStyle="round"
+            borderColor="white"
+            padding={1}
+          >
+            <Box flexDirection="column">
+              <Box justifyContent="space-between">
+                <Text color="white">⚡ {entry.title} {entry.type ? `(${entry.type})` : ''}</Text>
+                <Text color="gray">{time}</Text>
+              </Box>
             </Box>
           </Box>
         )
@@ -209,7 +353,7 @@ export function ThreadDetailView({
       default:
         return (
           <Box
-            key={`${timestamp}-other`}
+            key={`${index}-other-${entry.__typename}`}
             marginBottom={1}
             borderStyle="round"
             borderColor="gray"
@@ -227,7 +371,7 @@ export function ThreadDetailView({
   }
 
   const helpText =
-    isFetching && !isLoading ? (
+    (isFetching && !isLoading) || (timelineFetching && !timelineLoading) ? (
       <Box>
         <Text color="gray" dimColor>
           ↑/↓/j/k: Navigate • F: Filters •{' '}
@@ -280,22 +424,26 @@ export function ThreadDetailView({
       </Box>
 
       {/* Timeline */}
-      {/* <Box flexDirection="column" marginBottom={1}> */}
-      {/*   <Text color="yellow" bold marginBottom={1}> */}
-      {/*     📜 Timeline ({thread.timeline.edges.length} entries) */}
-      {/*   </Text> */}
-      {/**/}
-      {/*   <Box flexDirection="column" height={20} overflow="hidden"> */}
-      {/*     {thread.timeline.edges.length === 0 ? ( */}
-      {/*       <Text color="gray">No timeline entries found</Text> */}
-      {/*     ) : ( */}
-      {/*       thread.timeline.edges */}
-      {/*         .slice() */}
-      {/*         .reverse() // Show most recent first */}
-      {/*         .map(({ node }) => renderTimelineEntry(node.entry, node.actor, node.timestamp)) */}
-      {/*     )} */}
-      {/*   </Box> */}
-      {/* </Box> */}
+      <Box flexDirection="column" marginBottom={1}>
+        <Text color="yellow" bold marginBottom={1}>
+          📜 Timeline {timeline ? `(${timeline.edges.length} entries)` : '(Loading...)'}
+        </Text>
+
+        <Box flexDirection="column" height={20} overflow="hidden">
+          {timelineError ? (
+            <Text color="red">Error loading timeline: {timelineError.message}</Text>
+          ) : !timeline ? (
+            <LoadingSpinner text="Loading timeline..." />
+          ) : timeline.edges.length === 0 ? (
+            <Text color="gray">No timeline entries found</Text>
+          ) : (
+            timeline.edges
+              .slice()
+              .reverse() // Show most recent first
+              .map(({ node }, index) => renderTimelineEntry(node.entry, node.actor, node.timestamp.iso8601, index))
+          )}
+        </Box>
+      </Box>
     </Layout>
   )
 }

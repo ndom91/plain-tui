@@ -7,6 +7,7 @@ import {
   GetTenantsQuery,
   GetThreadDetailsQuery,
   GetThreadsQuery,
+  GetTimelineEventsQuery,
   GetWorkspaceQuery,
 } from './queries/index.js'
 import type { Connection } from './types/base.js'
@@ -17,7 +18,7 @@ import type {
 } from './types/compatibility.js'
 import type { Workspace } from './types/plain.js'
 import type { ThreadsFilter, ThreadsSort, ThreadStatus } from './types/threads.js'
-import type { TimelineEntry } from './types/timeline.js'
+import type { TimelineEntry, TimelineEntryConnection } from './types/timeline.js'
 
 interface PlainConfig {
   apiKey: string
@@ -36,6 +37,8 @@ export interface GetThreadsArgs {
 export interface PaginationFilters {
   first?: number
   after?: string
+  last?: number
+  before?: string
 }
 
 interface WorkspaceResponse {
@@ -60,6 +63,13 @@ interface ThreadDetailsResponse {
   }
 }
 
+interface TimelineEventsResponse {
+  thread: {
+    id: string
+    timelineEntries: TimelineEntryConnection
+  }
+}
+
 export class PlainClient {
   private client: GraphQLClient
   private config: PlainConfig
@@ -74,6 +84,18 @@ export class PlainClient {
 
     if (obj.updatedAt && typeof obj.updatedAt === 'object' && obj.updatedAt.iso8601) {
       transformed.updatedAt = obj.updatedAt.iso8601
+    }
+
+    if (obj.timestamp && typeof obj.timestamp === 'object' && obj.timestamp.iso8601) {
+      transformed.timestamp = obj.timestamp.iso8601
+    }
+
+    if (
+      obj.customerReadAt &&
+      typeof obj.customerReadAt === 'object' &&
+      obj.customerReadAt.iso8601
+    ) {
+      transformed.customerReadAt = obj.customerReadAt.iso8601
     }
 
     return transformed
@@ -210,13 +232,37 @@ export class PlainClient {
     }
   }
 
-  // Get thread details with timeline
+  // Get thread details
   async getThreadDetails(threadId: string): Promise<ThreadDetailsResponse> {
     const response = await this.request<ThreadDetailsResponse>(GetThreadDetailsQuery, { threadId })
 
     return {
       ...response,
       thread: this.transformTimestamps(response.thread),
+    }
+  }
+
+  // Get timeline events for a thread
+  async getTimelineEvents(
+    threadId: string,
+    filters?: PaginationFilters
+  ): Promise<TimelineEventsResponse> {
+    const variables = {
+      threadId,
+      first: filters?.first || 50,
+      after: filters?.after,
+      last: filters?.last,
+      before: filters?.before,
+    }
+
+    const response = await this.request<TimelineEventsResponse>(GetTimelineEventsQuery, variables)
+
+    return {
+      ...response,
+      thread: {
+        ...response.thread,
+        timelineEntries: this.transformConnection(response.thread.timelineEntries),
+      },
     }
   }
 }
