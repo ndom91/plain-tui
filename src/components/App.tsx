@@ -1,8 +1,8 @@
 import { Box, Text, useApp, useInput } from 'ink'
 import type React from 'react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { PlainClient } from '../client.js'
-import type { Workspace } from '../types/plain.js'
+import { useRefreshQueries, useWorkspace } from '../hooks/usePlainQueries.js'
 import { CustomersView } from './CustomersView.js'
 import { HomeScreen } from './HomeScreen.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
@@ -16,48 +16,34 @@ interface AppState {
   view: View
   selectedThreadId?: string
   client?: PlainClient
-  workspace?: Workspace
-  error?: string
 }
 
 export function App(): React.ReactNode {
   const { exit } = useApp()
   const [state, setState] = useState<AppState>({ view: 'home' })
+  const { refreshAll } = useRefreshQueries()
 
-  useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        const client = new PlainClient()
-        const workspaceData = await client.getWorkspace()
+  const client = new PlainClient()
+  const { data: workspaceData, isLoading, error } = useWorkspace(client)
 
-        setState((prev) => ({
-          ...prev,
-          client,
-          workspace: workspaceData.myWorkspace,
-        }))
-      } catch (error) {
-        setState((prev) => ({
-          ...prev,
-          error: error instanceof Error ? error.message : 'Unknown error occurred',
-        }))
-      }
-    }
+  if (!state.client) {
+    setState((prev) => ({ ...prev, client }))
+  }
 
-    initializeApp()
-  }, [])
-
+  // Global keyboard shortcuts
   useInput((input, key) => {
-    // Global keyboard shortcuts
     if (key.ctrl && input === 'c') {
       exit()
       process.exit(0)
     } else if (input === 'q') {
       if (state.view === 'home') {
-        exit() // Exit app from home screen
+        exit()
         process.exit(0)
       } else {
-        setState((prev) => ({ ...prev, view: 'home' })) // Go back to home from other views
+        setState((prev) => ({ ...prev, view: 'home' }))
       }
+    } else if (input === 'r') {
+      refreshAll()
     }
   })
 
@@ -69,27 +55,30 @@ export function App(): React.ReactNode {
     }))
   }
 
-  if (state.error) {
+  if (error) {
     return (
       <Box flexDirection="column" padding={1}>
-        <Text color="red">❌ Error: {state.error}</Text>
+        <Text color="red">
+          ❌ Error: {error instanceof Error ? error.message : 'Unknown error occurred'}
+        </Text>
         <Text color="gray">
           Please ensure you have a valid configuration file at ~/.config/plain-tui.json
         </Text>
         <Text color="gray">
           Example: {JSON.stringify({ apiKey: 'your-api-key-here' }, null, 2)}
         </Text>
+        <Text color="gray">Press 'r' to retry</Text>
       </Box>
     )
   }
 
-  if (!state.client || !state.workspace) {
+  if (isLoading || !workspaceData) {
     return <LoadingSpinner text="Connecting to Plain..." />
   }
 
   const commonProps = {
     client: state.client,
-    workspace: state.workspace,
+    workspace: workspaceData.myWorkspace,
     onNavigate: navigateToView,
   }
 
@@ -103,7 +92,7 @@ export function App(): React.ReactNode {
     case 'tenants':
       return <TenantsView {...commonProps} />
     case 'thread-detail':
-      return <ThreadDetailView {...commonProps} threadId={state.selectedThreadId!} />
+      return <ThreadDetailView {...commonProps} threadId={state.selectedThreadId} />
     default:
       return <HomeScreen {...commonProps} />
   }

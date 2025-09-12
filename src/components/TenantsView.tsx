@@ -1,9 +1,10 @@
 import { Box, Text, useInput } from 'ink'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { PlainClient } from '../client.js'
 import type { SimpleTenant as Tenant } from '../types/compatibility.js'
 import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
+import { useTenants, useRefreshQueries } from '../hooks/usePlainQueries.js'
 import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
 
@@ -14,29 +15,23 @@ interface TenantsViewProps {
 }
 
 export function TenantsView({ client, onNavigate }: TenantsViewProps) {
-  const [tenants, setTenants] = useState<Tenant[]>([])
-  const [loading, setLoading] = useState(true)
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [error, setError] = useState<string>()
+  const { refreshTenants } = useRefreshQueries()
 
-  useEffect(() => {
-    const loadTenants = async () => {
-      try {
-        const response = await client.getTenants({ first: 50 })
-        setTenants(response.tenants.edges.map((edge: any) => edge.node))
-        setLoading(false)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load tenants')
-        setLoading(false)
-      }
-    }
+  // Use TanStack Query for tenants data
+  const { data: tenantsData, isLoading, error } = useTenants(client, { first: 50 })
+  const tenants = tenantsData?.tenants.edges.map((edge: any) => edge.node) || []
 
-    loadTenants()
-  }, [client])
+  // Reset selectedIndex when tenants change
+  if (selectedIndex >= tenants.length && tenants.length > 0) {
+    setSelectedIndex(0)
+  }
 
   useInput((input, key) => {
     if (input === 'q') {
       onNavigate('home')
+    } else if (input === 'r') {
+      refreshTenants({ first: 50 })
     } else if ((key.upArrow || input === 'k') && tenants.length > 0) {
       setSelectedIndex((prev) => Math.max(0, prev - 1))
     } else if ((key.downArrow || input === 'j') && tenants.length > 0) {
@@ -44,7 +39,7 @@ export function TenantsView({ client, onNavigate }: TenantsViewProps) {
     }
   })
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Box margin={1}>
         <LoadingSpinner text="Loading tenants..." />
@@ -55,8 +50,10 @@ export function TenantsView({ client, onNavigate }: TenantsViewProps) {
   if (error) {
     return (
       <Box flexDirection="column" padding={1}>
-        <Text color="red">❌ Error: {error}</Text>
-        <Text color="gray">Press 'q' to go back</Text>
+        <Text color="red">
+          ❌ Error: {error instanceof Error ? error.message : 'Failed to load tenants'}
+        </Text>
+        <Text color="gray">Press 'r' to retry or 'q' to go back</Text>
       </Box>
     )
   }
@@ -68,9 +65,7 @@ export function TenantsView({ client, onNavigate }: TenantsViewProps) {
       helpText="↑/↓/j/k: Navigate • Enter: View • F: Filters • R: Refresh • Q: Back"
     >
       <Box flexDirection="column" padding={1}>
-        {/* Tenant List */}
         <Box flexDirection="column">
-          <Text>{JSON.stringify(tenants[0], null, 2)}</Text>
           {tenants.length === 0 ? (
             <Box padding={2}>
               <Text color="gray">No tenants found</Text>

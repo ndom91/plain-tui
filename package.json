@@ -19,6 +19,7 @@
   "author": "ndom91 <yo@ndo.dev>",
   "license": "MIT",
   "dependencies": {
+    "@tanstack/react-query": "^5.87.4",
     "@types/react": "^19.1.12",
     "graphql": "^16.11.0",
     "graphql-request": "^7.2.0",

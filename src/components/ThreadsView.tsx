@@ -1,7 +1,7 @@
 import { Box, Text, useInput } from 'ink'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { PlainClient } from '../client.js'
-import type { SimpleThread as Thread } from '../types/compatibility.js'
+import { useRefreshQueries, useThreads } from '../hooks/usePlainQueries.js'
 import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
 import { Layout } from './Layout.js'
@@ -17,9 +17,6 @@ interface ThreadsViewProps {
 // Thread interface imported from compatibility layer
 
 interface ThreadsState {
-  threads: Thread[]
-  loading: boolean
-  error?: string
   selectedIndex: number
   showFilters: boolean
   filters: {
@@ -34,8 +31,6 @@ const priorityOptions = [0, 1, 2, 3, 4]
 
 export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
   const [state, setState] = useState<ThreadsState>({
-    threads: [],
-    loading: true,
     selectedIndex: 0,
     showFilters: false,
     filters: {
@@ -45,36 +40,22 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
     },
   })
 
-  const loadThreads = async () => {
-    setState((prev) => ({ ...prev, loading: true }))
-    try {
-      const response = await client.getThreads({
-        statuses: state.filters.statuses.length > 0 ? state.filters.statuses : undefined,
-        priorities: state.filters.priorities.length > 0 ? state.filters.priorities : undefined,
-        assignedToUsers:
-          state.filters.assignedToUsers.length > 0 ? state.filters.assignedToUsers : undefined,
-        first: 50,
-      })
+  const { refreshThreads } = useRefreshQueries()
 
-      setState((prev) => ({
-        ...prev,
-        threads: response.threads.edges.map((edge: any) => edge.node),
-        loading: false,
-        selectedIndex: 0,
-      }))
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        error: error instanceof Error ? error.message : 'Failed to load threads',
-        loading: false,
-      }))
-    }
+  const queryFilters = {
+    statuses: state.filters.statuses.length > 0 ? state.filters.statuses : undefined,
+    priorities: state.filters.priorities.length > 0 ? state.filters.priorities : undefined,
+    assignedToUsers:
+      state.filters.assignedToUsers.length > 0 ? state.filters.assignedToUsers : undefined,
+    first: 50,
   }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: loadThreads will change on every render
-  useEffect(() => {
-    loadThreads()
-  }, [state.filters])
+  const { data: threadsData, isLoading, error, isFetching } = useThreads(client, queryFilters)
+  const threads = threadsData?.threads.edges.map((edge: any) => edge.node) || []
+
+  if (state.selectedIndex >= threads.length && threads.length > 0) {
+    setState((prev) => ({ ...prev, selectedIndex: 0 }))
+  }
 
   useInput((input, key) => {
     if (state.showFilters) {
@@ -89,19 +70,19 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
     } else if (input === 'f') {
       setState((prev) => ({ ...prev, showFilters: !prev.showFilters }))
     } else if (input === 'r') {
-      loadThreads()
-    } else if ((key.upArrow || input === 'k') && state.threads.length > 0) {
+      refreshThreads(queryFilters)
+    } else if ((key.upArrow || input === 'k') && threads.length > 0) {
       setState((prev) => ({
         ...prev,
         selectedIndex: Math.max(0, prev.selectedIndex - 1),
       }))
-    } else if ((key.downArrow || input === 'j') && state.threads.length > 0) {
+    } else if ((key.downArrow || input === 'j') && threads.length > 0) {
       setState((prev) => ({
         ...prev,
-        selectedIndex: Math.min(prev.threads.length - 1, prev.selectedIndex + 1),
+        selectedIndex: Math.min(threads.length - 1, prev.selectedIndex + 1),
       }))
-    } else if (key.return && state.threads.length > 0) {
-      const selectedThread = state.threads[state.selectedIndex]
+    } else if (key.return && threads.length > 0) {
+      const selectedThread = threads[state.selectedIndex]
       if (selectedThread) {
         onNavigate('thread-detail', selectedThread.id)
       }
@@ -135,7 +116,7 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
     return icons[priority] || '⚪'
   }
 
-  if (state.loading) {
+  if (isLoading) {
     return (
       <Box margin={1}>
         <LoadingSpinner text="Loading threads..." />
@@ -143,10 +124,12 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
     )
   }
 
-  if (state.error) {
+  if (error) {
     return (
       <Box flexDirection="column" padding={1}>
-        <Text color="red">❌ Error: {state.error}</Text>
+        <Text color="red">
+          ❌ Error: {error instanceof Error ? error.message : 'Failed to load threads'}
+        </Text>
         <Text color="gray">Press 'r' to retry or 'q' to go back</Text>
       </Box>
     )
@@ -166,7 +149,7 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
     )
   }
 
-  const threadItems = state.threads.map((thread, index) => (
+  const threadItems = threads.map((thread, index) => (
     <Box
       key={thread.id}
       borderStyle={index === state.selectedIndex ? 'round' : undefined}
@@ -228,14 +211,30 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
     </Box>
   ))
 
+  const helpText =
+    isFetching && !isLoading ? (
+      <Box>
+        <Text color="gray" dimColor>
+          ↑/↓/j/k: Navigate • Enter: View • F: Filters •{' '}
+        </Text>
+        <LoadingSpinner text="" />
+        <Text color="gray" dimColor>
+          {' '}
+          Refreshing • Q: Back
+        </Text>
+      </Box>
+    ) : (
+      '↑/↓/j/k: Navigate • Enter: View • F: Filters • R: Refresh • Q: Back'
+    )
+
   return (
     <Layout
       title="Threads"
-      subtitle={`${state.threads.length} threads found`}
+      subtitle={`${threads.length} threads found`}
       statusText={state.showFilters ? 'Filters Active' : undefined}
-      helpText="↑/↓/j/k: Navigate • Enter: View • F: Filters • R: Refresh • Q: Back"
+      helpText={helpText}
     >
-      {state.threads.length === 0 ? (
+      {threads.length === 0 ? (
         <Box flexGrow={1} justifyContent="center" alignItems="center">
           <Text color="gray">No threads found</Text>
         </Box>

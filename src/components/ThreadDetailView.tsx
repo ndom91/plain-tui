@@ -1,8 +1,9 @@
 import { Box, Text, useInput } from 'ink'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { PlainClient } from '../client.js'
 import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
+import { useThreadDetails, useRefreshQueries } from '../hooks/usePlainQueries.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
 
 interface ThreadDetailViewProps {
@@ -60,32 +61,21 @@ export function ThreadDetailView({
   threadId,
   onNavigate,
 }: ThreadDetailViewProps) {
-  const [thread, setThread] = useState<ThreadDetail | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string>()
-
-  useEffect(() => {
-    const loadThreadDetail = async () => {
-      try {
-        const response = await client.getThreadDetails(threadId)
-        setThread(response.thread)
-        setLoading(false)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load thread details')
-        setLoading(false)
-      }
-    }
-
-    loadThreadDetail()
-  }, [client, threadId])
+  const { refreshThreadDetails } = useRefreshQueries()
+  
+  // Use TanStack Query for thread details
+  const { data: threadData, isLoading, error } = useThreadDetails(client, threadId)
+  const thread = threadData?.thread
 
   useInput((input, _key) => {
     if (input === 'q') {
       onNavigate('threads')
+    } else if (input === 'r') {
+      refreshThreadDetails(threadId)
     }
   })
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Box margin={1}>
         <LoadingSpinner text="Loading thread details..." />
@@ -96,8 +86,8 @@ export function ThreadDetailView({
   if (error || !thread) {
     return (
       <Box flexDirection="column" padding={1}>
-        <Text color="red">❌ Error: {error || 'Thread not found'}</Text>
-        <Text color="gray">Press 'q' to go back</Text>
+        <Text color="red">❌ Error: {error instanceof Error ? error.message : 'Thread not found'}</Text>
+        <Text color="gray">Press 'r' to retry or 'q' to go back</Text>
       </Box>
     )
   }

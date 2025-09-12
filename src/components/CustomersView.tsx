@@ -1,9 +1,10 @@
 import { Box, Text, useInput } from 'ink'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { PlainClient } from '../client.js'
 import type { SimpleCustomer as Customer } from '../types/compatibility.js'
 import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
+import { useCustomers, useRefreshQueries } from '../hooks/usePlainQueries.js'
 import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
 import { ScrollableList } from './ScrollableList.js'
@@ -15,29 +16,23 @@ interface CustomersViewProps {
 }
 
 export function CustomersView({ client, onNavigate }: CustomersViewProps) {
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [loading, setLoading] = useState(true)
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [error, setError] = useState<string>()
+  const { refreshCustomers } = useRefreshQueries()
+  
+  // Use TanStack Query for customers data
+  const { data: customersData, isLoading, error } = useCustomers(client, { first: 50 })
+  const customers = customersData?.customers.edges.map((edge: any) => edge.node) || []
 
-  useEffect(() => {
-    const loadCustomers = async () => {
-      try {
-        const response = await client.getCustomers({ first: 50 })
-        setCustomers(response.customers.edges.map((edge: any) => edge.node))
-        setLoading(false)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load customers')
-        setLoading(false)
-      }
-    }
-
-    loadCustomers()
-  }, [client])
+  // Reset selectedIndex when customers change
+  if (selectedIndex >= customers.length && customers.length > 0) {
+    setSelectedIndex(0)
+  }
 
   useInput((input, key) => {
     if (input === 'q') {
       onNavigate('home')
+    } else if (input === 'r') {
+      refreshCustomers({ first: 50 })
     } else if ((key.upArrow || input === 'k') && customers.length > 0) {
       setSelectedIndex((prev) => Math.max(0, prev - 1))
     } else if ((key.downArrow || input === 'j') && customers.length > 0) {
@@ -45,7 +40,7 @@ export function CustomersView({ client, onNavigate }: CustomersViewProps) {
     }
   })
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Box margin={1}>
         <LoadingSpinner text="Loading customers..." />
@@ -56,8 +51,8 @@ export function CustomersView({ client, onNavigate }: CustomersViewProps) {
   if (error) {
     return (
       <Box flexDirection="column" padding={1}>
-        <Text color="red">❌ Error: {error}</Text>
-        <Text color="gray">Press 'q' to go back</Text>
+        <Text color="red">❌ Error: {error instanceof Error ? error.message : 'Failed to load customers'}</Text>
+        <Text color="gray">Press 'r' to retry or 'q' to go back</Text>
       </Box>
     )
   }
@@ -101,7 +96,7 @@ export function CustomersView({ client, onNavigate }: CustomersViewProps) {
     <Layout
       title="Customers"
       subtitle={`${customers.length} customers found`}
-      helpText="↑/↓/j/k: Navigate • Q: Back"
+      helpText="↑/↓/j/k: Navigate • R: Refresh • Q: Back"
     >
       {customers.length === 0 ? (
         <Box flexGrow={1} justifyContent="center" alignItems="center">
