@@ -154,14 +154,13 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
       key={thread.id}
       borderStyle={index === state.selectedIndex ? 'round' : undefined}
       borderColor={index === state.selectedIndex ? 'cyan' : undefined}
-      padding={index === state.selectedIndex ? 1 : 0}
-      marginBottom={1}
+      padding={1}
+      marginBottom={index === state.selectedIndex ? 1 : 0}
     >
-      <Box flexDirection="column" width="100%">
+      <Box flexDirection="column" width="100%" justifyContent="space-around" gap={1}>
         <Box justifyContent="space-between">
           <Box>
-            <Text color={index === state.selectedIndex ? 'cyan' : 'white'} bold>
-              {index === state.selectedIndex ? '► ' : '  '}
+            <Text color={index === state.selectedIndex ? 'cyan' : 'white'}>
               {thread.title || 'Untitled Thread'}
             </Text>
           </Box>
@@ -172,7 +171,7 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
         </Box>
 
         <Box marginTop={0} marginLeft={2}>
-          <Text color="gray">
+          <Text color="white">
             👤 {thread.customer.fullName} ({thread.customer.email.email})
             {thread.customer.company && ` • 🏢 ${thread.customer.company.name}`}
           </Text>
@@ -194,17 +193,16 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
 
         {thread.previewText && (
           <Box marginLeft={2} marginTop={0}>
-            <Text color="gray">
-              💬 {thread.previewText.substring(0, 100)}
-              {thread.previewText.length > 100 ? '...' : ''}
+            <Text color="gray" wrap="truncate-end">
+              💬 {thread.previewText}
+              {` `}
             </Text>
           </Box>
         )}
 
         <Box marginLeft={2} marginTop={0}>
           <Text color="gray">
-            🕐 Updated: {formatDate(thread.updatedAt)}
-            {' • '}Created: {formatDate(thread.createdAt)}
+            Updated: {formatDate(thread.updatedAt)} {' • '}Created: {formatDate(thread.createdAt)}
           </Text>
         </Box>
       </Box>
