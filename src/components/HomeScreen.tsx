@@ -76,10 +76,12 @@ export function HomeScreen({ workspace, onNavigate }: HomeScreenProps) {
                   color={selectedIndex === index ? 'black' : 'white'}
                   backgroundColor={selectedIndex === index ? 'cyan' : undefined}
                 >
-                  {selectedIndex === index ? '→ ' : '  '}[{item.key.toUpperCase()}] {item.label}
+                  {' '}
+                  [{item.key.toUpperCase()}] {item.label}
                 </Text>
                 <Text color="gray" backgroundColor={selectedIndex === index ? 'cyan' : undefined}>
-                  - {item.description}
+                  {' '}
+                  - {item.description}{' '}
                 </Text>
               </Box>
             </Box>

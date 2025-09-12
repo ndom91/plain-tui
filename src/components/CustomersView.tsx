@@ -70,7 +70,6 @@ export function CustomersView({ client, onNavigate }: CustomersViewProps) {
       <Box flexDirection="column" width="100%">
         <Box justifyContent="space-between">
           <Text color={index === selectedIndex ? 'green' : 'white'} bold>
-            {index === selectedIndex ? '► ' : '  '}
             {customer.fullName}
             {customer.shortName && ` (${customer.shortName})`}
           </Text>

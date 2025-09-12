@@ -63,13 +63,13 @@ export function ThreadDetailView({
 }: ThreadDetailViewProps) {
   const { refreshThreadDetails, refreshTimelineEvents } = useRefreshQueries()
   const { data: threadData, isLoading, error, isFetching } = useThreadDetails(client, threadId)
-  const { 
-    data: timelineData, 
-    isLoading: timelineLoading, 
-    error: timelineError, 
-    isFetching: timelineFetching 
+  const {
+    data: timelineData,
+    isLoading: timelineLoading,
+    error: timelineError,
+    isFetching: timelineFetching,
   } = useTimelineEvents(client, threadId)
-  
+
   const thread = threadData?.thread
   const timeline = timelineData?.thread?.timelineEntries
 
@@ -85,7 +85,9 @@ export function ThreadDetailView({
   if (isLoading || timelineLoading) {
     return (
       <Box margin={1}>
-        <LoadingSpinner text={isLoading ? "Loading thread details..." : "Loading timeline events..."} />
+        <LoadingSpinner
+          text={isLoading ? 'Loading thread details...' : 'Loading timeline events...'}
+        />
       </Box>
     )
   }
@@ -105,7 +107,8 @@ export function ThreadDetailView({
     return (
       <Box flexDirection="column" padding={1}>
         <Text color="red">
-          ❌ Timeline Error: {timelineError instanceof Error ? timelineError.message : 'Timeline not found'}
+          ❌ Timeline Error:{' '}
+          {timelineError instanceof Error ? timelineError.message : 'Timeline not found'}
         </Text>
         <Text color="gray">Press 'r' to retry or 'q' to go back</Text>
       </Box>
@@ -146,10 +149,10 @@ export function ThreadDetailView({
         : actor.__typename === 'CustomerActor'
           ? actor.customer.fullName
           : actor.__typename === 'MachineUserActor'
-          ? actor.machineUser.publicName
-          : actor.__typename === 'SystemActor'
-          ? 'System'
-          : 'Unknown'
+            ? actor.machineUser.publicName
+            : actor.__typename === 'SystemActor'
+              ? 'System'
+              : 'Unknown'
 
     const time = formatDate(timestamp)
 
@@ -161,10 +164,9 @@ export function ThreadDetailView({
             marginBottom={1}
             borderStyle="round"
             borderColor="blue"
-            padding={1}
           >
-            <Box flexDirection="column">
-              <Box justifyContent="space-between">
+            <Box flexDirection="column" width="100%">
+              <Box justifyContent="space-between" width="100%">
                 <Text color="blue">💬 Chat from {actorName}</Text>
                 <Text color="gray">{time}</Text>
               </Box>
@@ -174,7 +176,7 @@ export function ThreadDetailView({
               {entry.customerReadAt && (
                 <Box marginTop={1}>
                   <Text color="green">
-                    ✓ Read by customer at {formatDate(entry.customerReadAt.iso8601)}
+                    ✓ Read by customer at {formatDate(entry.customerReadAt)}
                   </Text>
                 </Box>
               )}
@@ -194,15 +196,17 @@ export function ThreadDetailView({
             marginBottom={1}
             borderStyle="round"
             borderColor="green"
-            padding={1}
           >
-            <Box flexDirection="column">
-              <Box justifyContent="space-between">
+            <Box flexDirection="column" width="100%" flexGrow={1}>
+              <Box justifyContent="space-between" width="100%">
                 <Text color="green">📧 Email: {entry.subject || '(no subject)'}</Text>
                 <Text color="gray">{time}</Text>
               </Box>
               <Text color="gray">
-                From: {entry.from.name || entry.from.email} ({entry.from.email}) → To: {entry.to.name || entry.to.email} ({entry.to.email})
+                From: {entry.from.name || entry.from.email} ({entry.from.email})
+              </Text>
+              <Text color="gray">
+                To: {entry.to.name || entry.to.email} ({entry.to.email})
               </Text>
               {entry.textContent && (
                 <Box marginTop={1}>
@@ -211,7 +215,15 @@ export function ThreadDetailView({
               )}
               {entry.sendStatus && (
                 <Box marginTop={1}>
-                  <Text color={entry.sendStatus === 'SENT' ? 'green' : entry.sendStatus === 'FAILED' ? 'red' : 'yellow'}>
+                  <Text
+                    color={
+                      entry.sendStatus === 'SENT'
+                        ? 'green'
+                        : entry.sendStatus === 'FAILED'
+                          ? 'red'
+                          : 'yellow'
+                    }
+                  >
                     Status: {entry.sendStatus}
                   </Text>
                 </Box>
@@ -232,10 +244,9 @@ export function ThreadDetailView({
             marginBottom={1}
             borderStyle="round"
             borderColor="yellow"
-            padding={1}
           >
-            <Box flexDirection="column">
-              <Box justifyContent="space-between">
+            <Box flexDirection="column" width="100%">
+              <Box justifyContent="space-between" width="100%">
                 <Text color="yellow">📝 Note from {actorName}</Text>
                 <Text color="gray">{time}</Text>
               </Box>
@@ -258,10 +269,10 @@ export function ThreadDetailView({
             marginBottom={1}
             borderStyle="round"
             borderColor="magenta"
-            padding={1}
+            width="100%"
           >
-            <Box flexDirection="column">
-              <Box justifyContent="space-between">
+            <Box flexDirection="column" width="100%">
+              <Box justifyContent="space-between" width="100%">
                 <Text color="magenta">💬 Slack message from {actorName}</Text>
                 <Text color="gray">{time}</Text>
               </Box>
@@ -286,11 +297,10 @@ export function ThreadDetailView({
             marginBottom={1}
             borderStyle="round"
             borderColor="magenta"
-            padding={1}
           >
-            <Box flexDirection="column">
-              <Box justifyContent="space-between">
-                <Text color="magenta">↪️ Slack reply from {actorName}</Text>
+            <Box flexDirection="column" width="100%">
+              <Box justifyContent="space-between" width="100%">
+                <Text color="magenta">↪ Slack reply from {actorName}</Text>
                 <Text color="gray">{time}</Text>
               </Box>
               <Box marginTop={1}>
@@ -307,7 +317,6 @@ export function ThreadDetailView({
             marginBottom={1}
             borderStyle="round"
             borderColor="cyan"
-            padding={1}
           >
             <Box justifyContent="space-between">
               <Text color="cyan">🎯 {entry.title}</Text>
@@ -323,9 +332,8 @@ export function ThreadDetailView({
             marginBottom={1}
             borderStyle="round"
             borderColor="blue"
-            padding={1}
           >
-            <Box justifyContent="space-between">
+            <Box justifyContent="space-between" width="100%">
               <Text color="blue">👤 {entry.title}</Text>
               <Text color="gray">{time}</Text>
             </Box>
@@ -339,11 +347,12 @@ export function ThreadDetailView({
             marginBottom={1}
             borderStyle="round"
             borderColor="white"
-            padding={1}
           >
-            <Box flexDirection="column">
-              <Box justifyContent="space-between">
-                <Text color="white">⚡ {entry.title} {entry.type ? `(${entry.type})` : ''}</Text>
+            <Box flexDirection="column" width="100%">
+              <Box justifyContent="space-between" width="100%">
+                <Text color="white">
+                  ⚡ {entry.title} {entry.type ? `(${entry.type})` : ''}
+                </Text>
                 <Text color="gray">{time}</Text>
               </Box>
             </Box>
@@ -357,9 +366,8 @@ export function ThreadDetailView({
             marginBottom={1}
             borderStyle="round"
             borderColor="gray"
-            padding={1}
           >
-            <Box justifyContent="space-between">
+            <Box justifyContent="space-between" width="100%">
               <Text color="gray">
                 🔄 {entry.__typename} by {actorName}
               </Text>
@@ -440,7 +448,9 @@ export function ThreadDetailView({
             timeline.edges
               .slice()
               .reverse() // Show most recent first
-              .map(({ node }, index) => renderTimelineEntry(node.entry, node.actor, node.timestamp.iso8601, index))
+              .map(({ node }, index) =>
+                renderTimelineEntry(node.entry, node.actor, node.timestamp, index)
+              )
           )}
         </Box>
       </Box>

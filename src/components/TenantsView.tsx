@@ -90,7 +90,6 @@ export function TenantsView({ client, onNavigate }: TenantsViewProps) {
                 <Box flexDirection="column" width="100%">
                   <Box justifyContent="space-between">
                     <Text color={index === selectedIndex ? 'magenta' : 'white'} bold>
-                      {index === selectedIndex ? '► ' : '  '}
                       {tenant.name}
                     </Text>
                     <Text color="gray">ID: {tenant.identifier}</Text>
