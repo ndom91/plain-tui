@@ -5,54 +5,14 @@ import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
 import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
+import type { ThreadEventEntry } from '../types/timeline.js'
+import type { Actor } from '../types/index.js'
 
 interface ThreadDetailViewProps {
   client: PlainClient
   workspace: Workspace
   threadId: string
   onNavigate: (view: View) => void
-}
-
-interface ThreadDetail {
-  id: string
-  title: string
-  status: string
-  priority: number
-  statusChangedAt: string
-  createdAt: string
-  updatedAt: string
-  customer: {
-    id: string
-    fullName: string
-    email: { email: string }
-    company?: { name: string }
-  }
-  assignedToUser?: {
-    user: {
-      id: string
-      fullName: string
-      publicName: string
-      avatarUrl?: string
-    }
-  }
-  labels: Array<{
-    id: string
-    labelType: {
-      name: string
-      color: string
-      icon?: string
-    }
-  }>
-  // timeline: {
-  //   edges: Array<{
-  //     node: {
-  //       id: string
-  //       timestamp: string
-  //       actor: any
-  //       entry: any
-  //     }
-  //   }>
-  // }
 }
 
 export function ThreadDetailView({
@@ -115,22 +75,18 @@ export function ThreadDetailView({
     )
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'TODO':
-        return 'yellow'
-      case 'DONE':
-        return 'green'
-      case 'SNOOZED':
-        return 'blue'
-      default:
-        return 'gray'
-    }
-  }
-
   const getPriorityIcon = (priority: number) => {
-    const icons = ['⚪', '🟡', '🟠', '🔴', '🚨']
+    const icons = ['🚨', '🔴', '🟠', '🟡']
     return icons[priority] || '⚪'
+  }
+  const getPriorityLabel = (priority: number) => {
+    const priorityLabels = {
+      0: 'Urgent',
+      1: 'High',
+      2: 'Normal',
+      3: 'Low',
+    }
+    return priorityLabels[priority]
   }
 
   const formatDate = (dateString: string) => {
@@ -142,7 +98,12 @@ export function ThreadDetailView({
     )
   }
 
-  const renderTimelineEntry = (entry: any, actor: any, timestamp: string, index: number) => {
+  const renderTimelineEntry = (
+    entry: ThreadEventEntry,
+    actor: any,
+    timestamp: string,
+    index: number
+  ) => {
     const actorName =
       actor.__typename === 'UserActor'
         ? actor.user.publicName
@@ -300,7 +261,9 @@ export function ThreadDetailView({
           >
             <Box flexDirection="column" width="100%">
               <Box justifyContent="space-between" width="100%">
-                <Text color="magenta">↪ Slack reply from {actorName}</Text>
+                <Text color="magenta">
+                  {`↳`} Slack reply from {actorName}
+                </Text>
                 <Text color="gray">{time}</Text>
               </Box>
               <Box marginTop={1}>
@@ -397,7 +360,7 @@ export function ThreadDetailView({
   return (
     <Layout
       title={thread.title}
-      subtitle={`Priority: ${getPriorityIcon(thread.priority)} (${thread.priority})`}
+      subtitle={`Priority: ${getPriorityIcon(thread.priority)} (${getPriorityLabel(thread.priority)})`}
       statusText={thread.status}
       helpText={helpText}
     >
