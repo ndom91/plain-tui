@@ -10,9 +10,10 @@ interface ScrollableListProps {
 
 export function ScrollableList({ children, selectedIndex, itemHeight = 1 }: ScrollableListProps) {
   const [_columns, rows] = useStdoutDimensions()
-  // Account for header (2 rows) and footer (1 row) space used by Layout component  
-  const availableRows = Math.max(1, rows - 4)
-  const maxVisibleItems = Math.floor(availableRows / itemHeight)
+
+  // Account for header (2 rows) and footer (1 row) space used by Layout component
+  const availableRows = Math.max(1, rows)
+  const maxVisibleItems = Math.floor(availableRows / itemHeight) - 6
 
   let startIndex = 0
   if (children.length > maxVisibleItems) {
@@ -26,22 +27,24 @@ export function ScrollableList({ children, selectedIndex, itemHeight = 1 }: Scro
   return (
     <FullScreen>
       {showScrollIndicators && startIndex > 0 && (
-        <Box justifyContent="center" marginBottom={1}>
-          <Box borderStyle="round" borderColor="gray" paddingX={2}>
-            <Text color="gray">↑ {startIndex} more items above</Text>
+        <Box justifyContent="flex-start">
+          <Box paddingX={2} height={3}>
+            <Text dimColor color="gray">
+              ↑ {startIndex} more
+            </Text>
           </Box>
         </Box>
       )}
 
-      <Box flexDirection="column" flexGrow={1}>
+      <Box flexDirection="column" flexGrow={1} gap={1}>
         {visibleItems}
       </Box>
 
       {showScrollIndicators && startIndex + maxVisibleItems < children.length && (
-        <Box justifyContent="center" marginTop={1}>
-          <Box borderStyle="round" borderColor="gray" paddingX={2}>
-            <Text color="gray">
-              ↓ {children.length - startIndex - maxVisibleItems} more items below
+        <Box justifyContent="flex-start">
+          <Box paddingX={2} height={3}>
+            <Text dimColor color="gray">
+              ↓ {children.length - startIndex - maxVisibleItems} more
             </Text>
           </Box>
         </Box>

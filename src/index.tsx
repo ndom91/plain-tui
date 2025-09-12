@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
-import React from 'react'
 import { render } from 'ink'
-import { QueryProvider } from './components/QueryProvider.js'
 import { App } from './components/App.js'
+import { QueryProvider } from './components/QueryProvider.js'
 
 // Enable alternate screen buffer for full-screen mode
 process.stdout.write('\x1b[?1049h')
@@ -14,7 +13,7 @@ const instance = render(
   </QueryProvider>,
   {
     exitOnCtrlC: false,
-    patchConsole: false,
+    patchConsole: true,
   }
 )
 
