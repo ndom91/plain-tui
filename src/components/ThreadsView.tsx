@@ -154,37 +154,33 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
       key={thread.id}
       borderStyle={index === state.selectedIndex ? 'round' : undefined}
       borderColor={index === state.selectedIndex ? 'cyan' : undefined}
-      padding={1}
-      marginBottom={index === state.selectedIndex ? 1 : 0}
     >
-      <Box flexDirection="column" width="100%" justifyContent="space-around" gap={1}>
+      <Box flexDirection="column" width="100%">
         <Box justifyContent="space-between">
+          <Text color={index === state.selectedIndex ? 'cyan' : 'white'} bold>
+            {thread.title || 'Untitled Thread'}
+          </Text>
           <Box>
-            <Text color={index === state.selectedIndex ? 'cyan' : 'white'}>
-              {thread.title || 'Untitled Thread'}
-            </Text>
-          </Box>
-          <Box>
-            <Text color={getStatusColor(thread.status)}>{thread.status}</Text>
-            <Text> {getPriorityIcon(thread.priority)}</Text>
+            <Text color={getStatusColor(thread.status)}>{thread.status} </Text>
+            <Text>{getPriorityIcon(thread.priority)}</Text>
           </Box>
         </Box>
 
-        <Box marginTop={0} marginLeft={2}>
-          <Text color="white">
+        <Box>
+          <Text color="gray">
             👤 {thread.customer.fullName} ({thread.customer.email.email})
             {thread.customer.company && ` • 🏢 ${thread.customer.company.name}`}
           </Text>
         </Box>
 
         {thread.assignedToUser && (
-          <Box marginLeft={2}>
-            <Text color="gray">👨 Assigned to: {thread.assignedToUser.user.publicName}</Text>
+          <Box>
+            <Text color="gray">👨 {thread.assignedToUser.user.publicName}</Text>
           </Box>
         )}
 
         {thread.labels.length > 0 && (
-          <Box marginLeft={2}>
+          <Box>
             <Text color="gray">
               🏷 {thread.labels.map((label) => label.labelType.name).join(', ')}
             </Text>
@@ -192,17 +188,16 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
         )}
 
         {thread.previewText && (
-          <Box marginLeft={2} marginTop={0}>
-            <Text color="gray" wrap="truncate-end">
+          <Box>
+            <Text color="gray" wrap="truncate">
               💬 {thread.previewText}
-              {` `}
             </Text>
           </Box>
         )}
 
-        <Box marginLeft={2} marginTop={0}>
-          <Text color="gray">
-            Updated: {formatDate(thread.updatedAt)} {' • '}Created: {formatDate(thread.createdAt)}
+        <Box>
+          <Text color="gray" dimColor>
+            🕐 Updated {formatDate(thread.updatedAt)} • Created {formatDate(thread.createdAt)}
           </Text>
         </Box>
       </Box>
@@ -237,7 +232,7 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
           <Text color="gray">No threads found</Text>
         </Box>
       ) : (
-        <ScrollableList selectedIndex={state.selectedIndex} itemHeight={2}>
+        <ScrollableList selectedIndex={state.selectedIndex} itemHeight={4}>
           {threadItems}
         </ScrollableList>
       )}
