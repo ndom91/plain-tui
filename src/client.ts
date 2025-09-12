@@ -17,13 +17,22 @@ import type {
   SimpleThread as Thread,
 } from './types/compatibility.js'
 import type { Workspace } from './types/plain.js'
-import type { ThreadsFilter, ThreadsSort, ThreadStatus } from './types/threads.js'
+import {
+  type ThreadStatus,
+  type ThreadsFilter,
+  type ThreadsSort,
+  ThreadsSortField,
+} from './types/threads.js'
 import type { TimelineEntry, TimelineEntryConnection } from './types/timeline.js'
 
 interface PlainConfig {
   apiKey: string
   workspaceId?: string
   endpoint?: string
+}
+
+type GetThreadsQueryInput = Partial<PaginationFilters> & { sortBy?: Partial<ThreadsSort> } & {
+  filters?: Partial<ThreadsFilter>
 }
 
 export interface GetThreadsArgs {
@@ -76,26 +85,49 @@ export class PlainClient {
 
   // biome-ignore lint/suspicious/noExplicitAny: API Response
   private transformTimestamps<T extends Record<string, any>>(obj: T): T {
+    if (!obj || typeof obj !== 'object') {
+      return obj
+    }
+
     const transformed = { ...obj }
 
-    if (obj.createdAt && typeof obj.createdAt === 'object' && obj.createdAt.iso8601) {
-      transformed.createdAt = obj.createdAt.iso8601
+    const dateTimeFields = [
+      'createdAt',
+      'updatedAt',
+      'timestamp',
+      'customerReadAt',
+      'sentAt',
+      'receivedAt',
+      'bouncedAt',
+      'lastEditedOnSlackAt',
+      'deletedOnSlackAt',
+      'lastEditedOnMsTeamsAt',
+      'deletedOnMsTeamsAt',
+      'lastEditedOnDiscordAt',
+      'deletedOnDiscordAt',
+      'resolvedAt',
+      'statusChangedAt',
+      'assignedAt',
+      'markedAsSpamAt',
+      'deletedAt',
+      'archivedAt',
+      'verifiedAt',
+    ]
+
+    for (const field of dateTimeFields) {
+      if (obj[field] && typeof obj[field] === 'object' && obj[field].iso8601) {
+        transformed[field] = obj[field].iso8601
+      }
     }
 
-    if (obj.updatedAt && typeof obj.updatedAt === 'object' && obj.updatedAt.iso8601) {
-      transformed.updatedAt = obj.updatedAt.iso8601
-    }
+    for (const key in transformed) {
+      const value = transformed[key]
 
-    if (obj.timestamp && typeof obj.timestamp === 'object' && obj.timestamp.iso8601) {
-      transformed.timestamp = obj.timestamp.iso8601
-    }
-
-    if (
-      obj.customerReadAt &&
-      typeof obj.customerReadAt === 'object' &&
-      obj.customerReadAt.iso8601
-    ) {
-      transformed.customerReadAt = obj.customerReadAt.iso8601
+      if (Array.isArray(value)) {
+        transformed[key] = value.map((item) => this.transformTimestamps(item))
+      } else if (value && typeof value === 'object' && !value.iso8601) {
+        transformed[key] = this.transformTimestamps(value)
+      }
     }
 
     return transformed
@@ -105,12 +137,27 @@ export class PlainClient {
   private transformConnection<T extends Record<string, any>>(
     connection: Connection<T>
   ): Connection<T> {
+    if (!connection || typeof connection !== 'object') {
+      return connection
+    }
+
     return {
       ...connection,
       edges: connection.edges.map((edge) => ({
         ...edge,
         node: this.transformTimestamps(edge.node),
       })),
+      ...Object.keys(connection).reduce((acc, key) => {
+        if (key !== 'edges') {
+          const value = connection[key]
+          if (value && typeof value === 'object') {
+            acc[key] = this.transformTimestamps(value)
+          } else {
+            acc[key] = value
+          }
+        }
+        return acc
+      }, {} as any),
     }
   }
 
@@ -145,23 +192,21 @@ export class PlainClient {
         throw new Error('API key is required')
       }
       return config
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to load config from ${configPath}. Please create the file with your Plain API key and workspaceId.`
       )
     }
   }
 
-  async request<T>(query: string, variables?: any): Promise<T> {
+  async request<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
     return this.client.request<T>(query, variables)
   }
 
-  // Get workspace info (Machine Users can't access myUser)
   async getWorkspace(): Promise<WorkspaceResponse> {
     return this.request<WorkspaceResponse>(GetWorkspaceQuery)
   }
 
-  // Get threads with filtering
   async getThreads(filters?: GetThreadsArgs): Promise<ThreadsResponse> {
     const threadsFilter: ThreadsFilter = {}
 
@@ -177,23 +222,19 @@ export class PlainClient {
       threadsFilter.priorities = filters.priorities
     }
 
-    // Build request variables properly
-    const variables: Partial<PaginationFilters> & Partial<ThreadsSort> = {
+    const variables: GetThreadsQueryInput = {
       first: filters?.first || 20,
     }
 
-    // Only add sortBy if we want sorting
     variables.sortBy = {
-      field: 'STATUS_CHANGED_AT',
+      field: ThreadsSortField.STATUS_CHANGED_AT,
       direction: 'DESC',
     }
 
-    // Only add filters if we have any
     if (Object.keys(threadsFilter).length > 0) {
       variables.filters = threadsFilter
     }
 
-    // Only add after if provided
     if (filters?.after) {
       variables.after = filters.after
     }
