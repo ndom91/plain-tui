@@ -1,10 +1,9 @@
 import { Box, Text, useInput } from 'ink'
 import { useState } from 'react'
 import type { PlainClient } from '../client.js'
-import type { SimpleTenant as Tenant } from '../types/compatibility.js'
+import { useRefreshQueries, useTenants } from '../hooks/usePlainQueries.js'
 import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
-import { useTenants, useRefreshQueries } from '../hooks/usePlainQueries.js'
 import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
 
@@ -17,18 +16,15 @@ interface TenantsViewProps {
 export function TenantsView({ client, onNavigate }: TenantsViewProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const { refreshTenants } = useRefreshQueries()
-
-  // Use TanStack Query for tenants data
-  const { data: tenantsData, isLoading, error } = useTenants(client, { first: 50 })
+  const { data: tenantsData, isLoading, error, isFetching } = useTenants(client, { first: 50 })
   const tenants = tenantsData?.tenants.edges.map((edge: any) => edge.node) || []
 
-  // Reset selectedIndex when tenants change
   if (selectedIndex >= tenants.length && tenants.length > 0) {
     setSelectedIndex(0)
   }
 
   useInput((input, key) => {
-    if (input === 'q') {
+    if (input === 'q' || key.escape) {
       onNavigate('home')
     } else if (input === 'r') {
       refreshTenants({ first: 50 })
@@ -58,12 +54,24 @@ export function TenantsView({ client, onNavigate }: TenantsViewProps) {
     )
   }
 
+  const helpText =
+    isFetching && !isLoading ? (
+      <Box>
+        <Text color="gray" dimColor>
+          ↑/↓/j/k: Navigate • Enter: View • F: Filters •{' '}
+        </Text>
+        <LoadingSpinner text="" />
+        <Text color="gray" dimColor>
+          {' '}
+          Refreshing • Q: Back
+        </Text>
+      </Box>
+    ) : (
+      '↑/↓/j/k: Navigate • Enter: View • F: Filters • R: Refresh • Q: Back'
+    )
+
   return (
-    <Layout
-      title="Tenants"
-      subtitle={``}
-      helpText="↑/↓/j/k: Navigate • Enter: View • F: Filters • R: Refresh • Q: Back"
-    >
+    <Layout title="Tenants" subtitle={``} helpText={helpText}>
       <Box flexDirection="column" padding={1}>
         <Box flexDirection="column">
           {tenants.length === 0 ? (

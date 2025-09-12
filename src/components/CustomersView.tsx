@@ -18,9 +18,9 @@ interface CustomersViewProps {
 export function CustomersView({ client, onNavigate }: CustomersViewProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const { refreshCustomers } = useRefreshQueries()
-  
+
   // Use TanStack Query for customers data
-  const { data: customersData, isLoading, error } = useCustomers(client, { first: 50 })
+  const { data: customersData, isLoading, error, isFetching } = useCustomers(client, { first: 50 })
   const customers = customersData?.customers.edges.map((edge: any) => edge.node) || []
 
   // Reset selectedIndex when customers change
@@ -29,7 +29,7 @@ export function CustomersView({ client, onNavigate }: CustomersViewProps) {
   }
 
   useInput((input, key) => {
-    if (input === 'q') {
+    if (input === 'q' || key.escape) {
       onNavigate('home')
     } else if (input === 'r') {
       refreshCustomers({ first: 50 })
@@ -51,7 +51,9 @@ export function CustomersView({ client, onNavigate }: CustomersViewProps) {
   if (error) {
     return (
       <Box flexDirection="column" padding={1}>
-        <Text color="red">❌ Error: {error instanceof Error ? error.message : 'Failed to load customers'}</Text>
+        <Text color="red">
+          ❌ Error: {error instanceof Error ? error.message : 'Failed to load customers'}
+        </Text>
         <Text color="gray">Press 'r' to retry or 'q' to go back</Text>
       </Box>
     )
@@ -92,11 +94,27 @@ export function CustomersView({ client, onNavigate }: CustomersViewProps) {
     </Box>
   ))
 
+  const helpText =
+    isFetching && !isLoading ? (
+      <Box>
+        <Text color="gray" dimColor>
+          ↑/↓/j/k: Navigate • F: Filters •{' '}
+        </Text>
+        <LoadingSpinner text="" />
+        <Text color="gray" dimColor>
+          {' '}
+          Refreshing • Q: Back
+        </Text>
+      </Box>
+    ) : (
+      '↑/↓/j/k: Navigate • F: Filters • R: Refresh • Q: Back'
+    )
+
   return (
     <Layout
       title="Customers"
-      subtitle={`${customers.length} customers found`}
-      helpText="↑/↓/j/k: Navigate • R: Refresh • Q: Back"
+      subtitle={`Customers: ${customers.length} customers found`}
+      helpText={helpText}
     >
       {customers.length === 0 ? (
         <Box flexGrow={1} justifyContent="center" alignItems="center">

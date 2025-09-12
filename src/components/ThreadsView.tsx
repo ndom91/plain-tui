@@ -65,7 +65,7 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
       return
     }
 
-    if (input === 'q') {
+    if (input === 'q' || key.escape) {
       onNavigate('home')
     } else if (input === 'f') {
       setState((prev) => ({ ...prev, showFilters: !prev.showFilters }))
@@ -203,8 +203,8 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
 
         <Box marginLeft={2} marginTop={0}>
           <Text color="gray">
-            🕐 Updated: {formatDate(thread.updatedAt.iso8601)}
-            {' • '}Created: {formatDate(thread.createdAt.iso8601)}
+            🕐 Updated: {formatDate(thread.updatedAt)}
+            {' • '}Created: {formatDate(thread.createdAt)}
           </Text>
         </Box>
       </Box>

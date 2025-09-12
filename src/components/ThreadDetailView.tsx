@@ -1,9 +1,9 @@
 import { Box, Text, useInput } from 'ink'
-import { useState } from 'react'
 import type { PlainClient } from '../client.js'
+import { useRefreshQueries, useThreadDetails } from '../hooks/usePlainQueries.js'
 import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
-import { useThreadDetails, useRefreshQueries } from '../hooks/usePlainQueries.js'
+import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
 
 interface ThreadDetailViewProps {
@@ -62,13 +62,11 @@ export function ThreadDetailView({
   onNavigate,
 }: ThreadDetailViewProps) {
   const { refreshThreadDetails } = useRefreshQueries()
-  
-  // Use TanStack Query for thread details
-  const { data: threadData, isLoading, error } = useThreadDetails(client, threadId)
+  const { data: threadData, isLoading, error, isFetching } = useThreadDetails(client, threadId)
   const thread = threadData?.thread
 
-  useInput((input, _key) => {
-    if (input === 'q') {
+  useInput((input, key) => {
+    if (input === 'q' || key.escape) {
       onNavigate('threads')
     } else if (input === 'r') {
       refreshThreadDetails(threadId)
@@ -86,7 +84,9 @@ export function ThreadDetailView({
   if (error || !thread) {
     return (
       <Box flexDirection="column" padding={1}>
-        <Text color="red">❌ Error: {error instanceof Error ? error.message : 'Thread not found'}</Text>
+        <Text color="red">
+          ❌ Error: {error instanceof Error ? error.message : 'Thread not found'}
+        </Text>
         <Text color="gray">Press 'r' to retry or 'q' to go back</Text>
       </Box>
     )
@@ -226,29 +226,29 @@ export function ThreadDetailView({
     }
   }
 
-  return (
-    <Box flexDirection="column" padding={1}>
-      {/* Header */}
-      <Box marginBottom={1} borderStyle="round" borderColor="cyan" padding={1}>
-        <Box flexDirection="column">
-          <Box justifyContent="space-between">
-            <Text color="cyan" bold>
-              🎫 {thread.title || 'Untitled Thread'}
-            </Text>
-            <Text color="gray">[Q] Back to Threads</Text>
-          </Box>
-
-          <Box marginTop={1}>
-            <Text color={getStatusColor(thread.status)}>Status: {thread.status}</Text>
-            <Text>
-              {' '}
-              • Priority: {getPriorityIcon(thread.priority)} ({thread.priority})
-            </Text>
-          </Box>
-        </Box>
+  const helpText =
+    isFetching && !isLoading ? (
+      <Box>
+        <Text color="gray" dimColor>
+          ↑/↓/j/k: Navigate • F: Filters •{' '}
+        </Text>
+        <LoadingSpinner text="" />
+        <Text color="gray" dimColor>
+          {' '}
+          Refreshing • Q: Back
+        </Text>
       </Box>
+    ) : (
+      '↑/↓/j/k: Navigate • F: Filters • R: Refresh • Q: Back'
+    )
 
-      {/* Thread Info */}
+  return (
+    <Layout
+      title={thread.title}
+      subtitle={`Priority: ${getPriorityIcon(thread.priority)} (${thread.priority})`}
+      statusText={thread.status}
+      helpText={helpText}
+    >
       <Box marginBottom={1} borderStyle="round" borderColor="green" padding={1}>
         <Box flexDirection="column">
           <Text color="green" bold>
@@ -296,11 +296,6 @@ export function ThreadDetailView({
       {/*     )} */}
       {/*   </Box> */}
       {/* </Box> */}
-
-      {/* Help */}
-      <Box borderStyle="round" borderColor="gray" padding={1}>
-        <Text color="green">Q: Back to threads list</Text>
-      </Box>
-    </Box>
+    </Layout>
   )
 }

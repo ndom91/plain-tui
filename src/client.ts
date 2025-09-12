@@ -176,15 +176,25 @@ export class PlainClient {
       variables.after = filters.after
     }
 
-    return this.request<ThreadsResponse>(GetThreadsQuery, variables)
+    const response = await this.request<ThreadsResponse>(GetThreadsQuery, variables)
+
+    return {
+      ...response,
+      threads: this.transformConnection(response.threads),
+    }
   }
 
   // Get customers
   async getCustomers(filters?: PaginationFilters): Promise<CustomersResponse> {
-    return this.request<CustomersResponse>(GetCustomersQuery, {
+    const response = await this.request<CustomersResponse>(GetCustomersQuery, {
       first: filters?.first || 20,
       after: filters?.after,
     })
+
+    return {
+      ...response,
+      customers: this.transformConnection(response.customers),
+    }
   }
 
   // Get tenants
@@ -202,6 +212,11 @@ export class PlainClient {
 
   // Get thread details with timeline
   async getThreadDetails(threadId: string): Promise<ThreadDetailsResponse> {
-    return this.request<ThreadDetailsResponse>(GetThreadDetailsQuery, { threadId })
+    const response = await this.request<ThreadDetailsResponse>(GetThreadDetailsQuery, { threadId })
+
+    return {
+      ...response,
+      thread: this.transformTimestamps(response.thread),
+    }
   }
 }
