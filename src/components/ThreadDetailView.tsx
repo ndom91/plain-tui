@@ -2,19 +2,12 @@ import { Box, Text, useInput } from 'ink'
 import { useState } from 'react'
 import type { PlainClient } from '../client.js'
 import { useRefreshQueries, useThreadDetails, useTimelineEvents } from '../hooks/usePlainQueries.js'
-import type { GetTimelineEventsQuery } from '../types/generated/graphql.js'
 import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
 import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
 import { ScrollableList } from './ScrollableList.js'
 import { TimelineEntry } from './TimelineEntry.js'
-
-// Extract types from generated GraphQL types
-type TimelineNode = NonNullable<
-  GetTimelineEventsQuery['thread']
->['timelineEntries']['edges'][0]['node']
-type Actor = TimelineNode['actor']
 
 interface ThreadDetailViewProps {
   client: PlainClient
@@ -112,7 +105,6 @@ export function ThreadDetailView({
     )
   }
 
-
   const helpText =
     (isFetching && !isLoading) || (timelineFetching && !timelineLoading) ? (
       <Box>
@@ -136,7 +128,7 @@ export function ThreadDetailView({
       statusText={thread.status}
       helpText={helpText}
     >
-      <Box marginBottom={1} borderStyle="round" borderColor="green" padding={1}>
+      <Box marginBottom={1} borderStyle="round" borderColor="green">
         <Box flexDirection="column">
           <Text color="green" bold>
             👤 Customer Information
@@ -166,9 +158,8 @@ export function ThreadDetailView({
         </Box>
       </Box>
 
-      {/* Timeline */}
       <Box flexDirection="column" marginBottom={1}>
-        <Text color="yellow" bold marginBottom={1}>
+        <Text color="yellow" bold>
           📜 Timeline {timeline ? `(${timeline.edges.length} entries)` : '(Loading...)'}
         </Text>
 
