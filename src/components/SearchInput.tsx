@@ -16,6 +16,8 @@ export function SearchInput({ value, onChange, onCancel, onSubmit, placeholder }
   useInput((input, key) => {
     if (key.escape) {
       onCancel()
+    } else if (key.ctrl && input === 'u') {
+      onChange('')
     }
   }, { isActive: isFocused })
 

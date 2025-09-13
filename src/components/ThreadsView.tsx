@@ -82,8 +82,14 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
         return
       }
 
-      if (input === 'q' || key.escape) {
+      if (input === 'q') {
         onNavigate('home')
+      } else if (key.escape) {
+        if (state.searchQuery.trim()) {
+          setState((prev) => ({ ...prev, showSearch: true }))
+        } else {
+          onNavigate('home')
+        }
       } else if (input === '/') {
         setState((prev) => ({ ...prev, showSearch: true }))
       } else if (input === 'f') {
