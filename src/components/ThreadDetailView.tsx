@@ -1,20 +1,19 @@
 import { Box, Text, useInput } from 'ink'
+import { useState } from 'react'
 import type { PlainClient } from '../client.js'
 import { useRefreshQueries, useThreadDetails, useTimelineEvents } from '../hooks/usePlainQueries.js'
+import type { GetTimelineEventsQuery } from '../types/generated/graphql.js'
 import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
 import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
-import type {
-  GetTimelineEventsQuery,
-  GetThreadDetailsQuery
-} from '../types/generated/graphql.js'
+import { ScrollableList } from './ScrollableList.js'
 
 // Extract types from generated GraphQL types
-type TimelineNode = NonNullable<GetTimelineEventsQuery['thread']>['timelineEntries']['edges'][0]['node']
+type TimelineNode = NonNullable<
+  GetTimelineEventsQuery['thread']
+>['timelineEntries']['edges'][0]['node']
 type Actor = TimelineNode['actor']
-type Entry = TimelineNode['entry']
-type DateTime = TimelineNode['timestamp']
 
 interface ThreadDetailViewProps {
   client: PlainClient
@@ -41,12 +40,18 @@ export function ThreadDetailView({
   const thread = threadData?.thread
   const timeline = timelineData?.thread?.timelineEntries
 
+  const [selectedTimelineIndex, setSelectedTimelineIndex] = useState(0)
+
   useInput((input, key) => {
     if (input === 'q' || key.escape) {
       onNavigate('threads')
     } else if (input === 'r') {
       refreshThreadDetails(threadId)
       refreshTimelineEvents(threadId)
+    } else if ((key.downArrow || input === 'j') && timeline) {
+      setSelectedTimelineIndex((prev) => Math.min(prev + 1, timeline.edges.length - 1))
+    } else if ((key.upArrow || input === 'k') && timeline) {
+      setSelectedTimelineIndex((prev) => Math.max(prev - 1, 0))
     }
   })
 
@@ -107,7 +112,7 @@ export function ThreadDetailView({
   }
 
   const renderTimelineEntry = (entry: Entry, actor: Actor, timestamp: string, index: number) => {
-    const actorName =
+    const rawActorName =
       actor.__typename === 'UserActor'
         ? actor.user.publicName
         : actor.__typename === 'CustomerActor'
@@ -118,17 +123,14 @@ export function ThreadDetailView({
               ? 'System'
               : 'Unknown'
 
+    const actorName = rawActorName.trim()
+
     const time = formatDate(timestamp)
 
     switch (entry.__typename) {
       case 'ChatEntry':
         return (
-          <Box
-            key={`${index}-chat-${entry.chatId}`}
-            marginBottom={1}
-            borderStyle="round"
-            borderColor="blue"
-          >
+          <Box key={`${index}-chat-${entry.chatId}`} borderStyle="round" borderColor="blue">
             <Box flexDirection="column" width="100%">
               <Box justifyContent="space-between" width="100%">
                 <Text color="blue">💬 Chat from {actorName}</Text>
@@ -155,12 +157,7 @@ export function ThreadDetailView({
 
       case 'EmailEntry':
         return (
-          <Box
-            key={`${index}-email-${entry.emailId}`}
-            marginBottom={1}
-            borderStyle="round"
-            borderColor="green"
-          >
+          <Box key={`${index}-email-${entry.emailId}`} borderStyle="round" borderColor="green">
             <Box flexDirection="column" width="100%" flexGrow={1}>
               <Box justifyContent="space-between" width="100%">
                 <Text color="green">📧 Email: {entry.subject || '(no subject)'}</Text>
@@ -203,12 +200,7 @@ export function ThreadDetailView({
 
       case 'NoteEntry':
         return (
-          <Box
-            key={`${index}-note-${entry.noteId}`}
-            marginBottom={1}
-            borderStyle="round"
-            borderColor="yellow"
-          >
+          <Box key={`${index}-note-${entry.noteId}`} borderStyle="round" borderColor="yellow">
             <Box flexDirection="column" width="100%">
               <Box justifyContent="space-between" width="100%">
                 <Text color="yellow">📝 Note from {actorName}</Text>
@@ -230,7 +222,6 @@ export function ThreadDetailView({
         return (
           <Box
             key={`${index}-slack-${entry.slackMessageLink}`}
-            marginBottom={1}
             borderStyle="round"
             borderColor="magenta"
             width="100%"
@@ -258,7 +249,6 @@ export function ThreadDetailView({
         return (
           <Box
             key={`${index}-slack-reply-${entry.slackMessageLink}`}
-            marginBottom={1}
             borderStyle="round"
             borderColor="magenta"
           >
@@ -280,7 +270,6 @@ export function ThreadDetailView({
         return (
           <Box
             key={`${index}-thread-event-${entry.timelineEventId}`}
-            marginBottom={1}
             borderStyle="round"
             borderColor="cyan"
           >
@@ -310,7 +299,6 @@ export function ThreadDetailView({
         return (
           <Box
             key={`${index}-custom-${entry.externalId || 'no-id'}`}
-            marginBottom={1}
             borderStyle="round"
             borderColor="white"
           >
@@ -327,12 +315,7 @@ export function ThreadDetailView({
 
       default:
         return (
-          <Box
-            key={`${index}-other-${entry.__typename}`}
-            marginBottom={1}
-            borderStyle="round"
-            borderColor="gray"
-          >
+          <Box key={`${index}-other-${entry.__typename}`} borderStyle="round" borderColor="gray">
             <Box justifyContent="space-between" width="100%">
               <Text color="gray">
                 🔄 {entry.__typename} by {actorName}
@@ -403,22 +386,22 @@ export function ThreadDetailView({
           📜 Timeline {timeline ? `(${timeline.edges.length} entries)` : '(Loading...)'}
         </Text>
 
-        <Box flexDirection="column" height={20} overflow="hidden">
-          {timelineError ? (
-            <Text color="red">Error loading timeline: {timelineError.message}</Text>
-          ) : !timeline ? (
-            <LoadingSpinner text="Loading timeline..." />
-          ) : timeline.edges.length === 0 ? (
-            <Text color="gray">No timeline entries found</Text>
-          ) : (
-            timeline.edges
+        {timelineError ? (
+          <Text color="red">Error loading timeline: {timelineError.message}</Text>
+        ) : !timeline ? (
+          <LoadingSpinner text="Loading timeline..." />
+        ) : timeline.edges.length === 0 ? (
+          <Text color="gray">No timeline entries found</Text>
+        ) : (
+          <ScrollableList selectedIndex={selectedTimelineIndex} itemHeight={4}>
+            {timeline.edges
               .slice()
               .reverse() // Show most recent first
               .map(({ node }, index) =>
                 renderTimelineEntry(node.entry, node.actor, node.timestamp, index)
-              )
-          )}
-        </Box>
+              )}
+          </ScrollableList>
+        )}
       </Box>
     </Layout>
   )
