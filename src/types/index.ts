@@ -18,4 +18,3 @@ export * from './timeline.js'
 
 // Core entities
 export * from './user.js'
-

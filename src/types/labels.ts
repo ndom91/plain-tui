@@ -40,4 +40,3 @@ export interface LabelTypeFilter {
 
 // Connection types
 export type LabelTypeConnection = Connection<LabelType>
-

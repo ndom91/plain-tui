@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import type { PlainClient, GetThreadsArgs, PaginationFilters } from '../client.js'
+import type { GetThreadsArgs, PaginationFilters, PlainClient } from '../client.js'
 
 // Query keys for consistent caching
 export const queryKeys = {
@@ -8,7 +8,11 @@ export const queryKeys = {
   customers: (filters?: PaginationFilters) => ['customers', filters],
   tenants: (filters?: PaginationFilters) => ['tenants', filters],
   threadDetails: (threadId: string) => ['thread-details', threadId],
-  timelineEvents: (threadId: string, filters?: PaginationFilters) => ['timeline-events', threadId, filters],
+  timelineEvents: (threadId: string, filters?: PaginationFilters) => [
+    'timeline-events',
+    threadId,
+    filters,
+  ],
 }
 
 // Workspace query hook
@@ -58,7 +62,11 @@ export function useThreadDetails(client: PlainClient, threadId: string) {
 }
 
 // Timeline events query hook
-export function useTimelineEvents(client: PlainClient, threadId: string, filters?: PaginationFilters) {
+export function useTimelineEvents(
+  client: PlainClient,
+  threadId: string,
+  filters?: PaginationFilters
+) {
   return useQuery({
     queryKey: queryKeys.timelineEvents(threadId, filters),
     queryFn: () => client.getTimelineEvents(threadId, filters),
@@ -70,19 +78,19 @@ export function useTimelineEvents(client: PlainClient, threadId: string, filters
 // Hook to manually refresh all queries
 export function useRefreshQueries() {
   const queryClient = useQueryClient()
-  
+
   return {
     refreshAll: () => queryClient.invalidateQueries(),
     refreshWorkspace: () => queryClient.invalidateQueries({ queryKey: queryKeys.workspace() }),
-    refreshThreads: (filters?: GetThreadsArgs) => 
+    refreshThreads: (filters?: GetThreadsArgs) =>
       queryClient.invalidateQueries({ queryKey: queryKeys.threads(filters) }),
-    refreshCustomers: (filters?: PaginationFilters) => 
+    refreshCustomers: (filters?: PaginationFilters) =>
       queryClient.invalidateQueries({ queryKey: queryKeys.customers(filters) }),
-    refreshTenants: (filters?: PaginationFilters) => 
+    refreshTenants: (filters?: PaginationFilters) =>
       queryClient.invalidateQueries({ queryKey: queryKeys.tenants(filters) }),
-    refreshThreadDetails: (threadId: string) => 
+    refreshThreadDetails: (threadId: string) =>
       queryClient.invalidateQueries({ queryKey: queryKeys.threadDetails(threadId) }),
-    refreshTimelineEvents: (threadId: string, filters?: PaginationFilters) => 
+    refreshTimelineEvents: (threadId: string, filters?: PaginationFilters) =>
       queryClient.invalidateQueries({ queryKey: queryKeys.timelineEvents(threadId, filters) }),
   }
 }

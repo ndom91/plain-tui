@@ -38,4 +38,3 @@ export type Actor =
   | MachineUserActor
 
 export type InternalActor = UserActor | SystemActor | MachineUserActor
-

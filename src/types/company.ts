@@ -39,4 +39,3 @@ export interface Company {
 }
 
 export type CompanyConnection = Connection<Company>
-

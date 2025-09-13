@@ -97,4 +97,3 @@ export interface CustomerGroupMembershipsFilter {
 
 export type CustomerGroupMembershipConnection = Connection<CustomerGroupMembership>
 export type CustomerTenantMembershipConnection = Connection<CustomerTenantMembership>
-

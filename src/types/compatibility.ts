@@ -61,4 +61,3 @@ export interface SimpleThread {
   }>
   previewText?: string
 }
-

@@ -183,4 +183,3 @@ export interface TimelineEntry {
 
 // Connection types
 export type TimelineEntryConnection = Connection<TimelineEntry>
-

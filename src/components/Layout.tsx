@@ -1,6 +1,7 @@
 import { Box, Text } from 'ink'
 import type { ReactNode } from 'react'
 import { FullScreen } from './FullScreen.js'
+import { Badge } from '@inkjs/ui'
 
 interface LayoutProps {
   title: string
@@ -11,33 +12,47 @@ interface LayoutProps {
   children: ReactNode
 }
 
-export function Layout({ title, subtitle, statusText, helpText, searchInput, children }: LayoutProps) {
+export function Layout({
+  title,
+  subtitle,
+  statusText,
+  helpText,
+  searchInput,
+  children,
+}: LayoutProps) {
   return (
     <FullScreen>
-      <Box paddingX={2} paddingY={0} justifyContent="space-between">
-        <Box flexDirection="column" marginTop={1}>
-          <Text color="cyan" bold>
-            {title}
-          </Text>
-          {subtitle && (
-            <Text color="gray" dimColor>
-              {subtitle}
+      <Box
+        borderStyle="round"
+        borderColor="cyan"
+        marginX={0}
+        paddingX={2}
+        paddingY={0}
+        justifyContent="space-between"
+      >
+        <Box flexDirection="column">
+          <Box>
+            <Text color="cyan" bold>
+              {title}
             </Text>
-          )}
-          {searchInput && (
-            <Box marginTop={1}>
-              {searchInput}
+          </Box>
+          {subtitle && (
+            <Box>
+              <Text color="gray" dimColor>
+                {subtitle}
+              </Text>
             </Box>
           )}
+          {searchInput && <Box marginTop={1}>{searchInput}</Box>}
         </Box>
         {statusText && (
           <Box alignSelf="center">
-            <Text color="yellow">{statusText}</Text>
+            <Badge>{statusText}</Badge>
           </Box>
         )}
       </Box>
 
-      <Box flexDirection="column" flexGrow={1} overflow="hidden">
+      <Box flexDirection="column" borderStyle="round" flexGrow={1} overflow="hidden">
         {children}
       </Box>
 

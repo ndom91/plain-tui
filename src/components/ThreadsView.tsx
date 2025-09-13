@@ -1,15 +1,15 @@
 import { Box, Text, useInput } from 'ink'
-import { useState, useCallback } from 'react'
-import type { PlainClient } from '../client.js'
+import { useState } from 'react'
+import type { GetThreadsArgs, PlainClient } from '../client.js'
 import { useRefreshQueries, useThreads } from '../hooks/usePlainQueries.js'
 import type { Workspace } from '../types/plain.js'
+import type { Thread, ThreadStatus } from '../types/threads.js'
 import type { View } from './App.js'
 import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
 import { ScrollableList } from './ScrollableList.js'
-import { ThreadItem } from './ThreadItem.js'
 import { SearchInput } from './SearchInput.js'
-import type { Thread } from '../types/threads.js'
+import { ThreadItem } from './ThreadItem.js'
 
 interface ThreadsViewProps {
   client: PlainClient
@@ -23,14 +23,11 @@ interface ThreadsState {
   showSearch: boolean
   searchQuery: string
   filters: {
-    statuses: string[]
+    statuses: ThreadStatus[]
     priorities: number[]
     assignedToUsers: string[]
   }
 }
-
-const statusOptions = ['TODO', 'SNOOZED', 'DONE']
-const priorityOptions = [0, 1, 2, 3, 4]
 
 export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
   const [state, setState] = useState<ThreadsState>({
@@ -45,10 +42,9 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
     },
   })
 
-
   const { refreshThreads } = useRefreshQueries()
 
-  const queryFilters = {
+  const queryFilters: GetThreadsArgs = {
     statuses: state.filters.statuses.length > 0 ? state.filters.statuses : undefined,
     priorities: state.filters.priorities.length > 0 ? state.filters.priorities : undefined,
     assignedToUsers:
@@ -57,7 +53,7 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
   }
 
   const { data: threadsData, isLoading, error, isFetching } = useThreads(client, queryFilters)
-  const allThreads: Thread[] = threadsData?.threads.edges.map((edge: any) => edge.node) || []
+  const allThreads: Thread[] = threadsData?.threads.edges.map((edge) => edge.node) || []
 
   const threads = state.searchQuery.trim()
     ? allThreads.filter(
@@ -115,7 +111,6 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
     },
     { isActive: !state.showSearch }
   )
-
 
   if (isLoading) {
     return (

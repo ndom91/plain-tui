@@ -25,4 +25,3 @@ export function LoadingSpinner({ text = 'Loading...' }: LoadingSpinnerProps) {
     </Box>
   )
 }
-

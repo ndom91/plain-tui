@@ -10,16 +10,25 @@ interface SearchInputProps {
   placeholder?: string
 }
 
-export function SearchInput({ value, onChange, onCancel, onSubmit, placeholder }: SearchInputProps) {
+export function SearchInput({
+  value,
+  onChange,
+  onCancel,
+  onSubmit,
+  placeholder,
+}: SearchInputProps) {
   const { isFocused } = useFocus({ autoFocus: true })
 
-  useInput((input, key) => {
-    if (key.escape) {
-      onCancel()
-    } else if (key.ctrl && input === 'u') {
-      onChange('')
-    }
-  }, { isActive: isFocused })
+  useInput(
+    (input, key) => {
+      if (key.escape) {
+        onCancel()
+      } else if (key.ctrl && input === 'u') {
+        onChange('')
+      }
+    },
+    { isActive: isFocused }
+  )
 
   return (
     <Box>
@@ -28,7 +37,7 @@ export function SearchInput({ value, onChange, onCancel, onSubmit, placeholder }
         value={value}
         onChange={onChange}
         onSubmit={onSubmit}
-        placeholder={placeholder || "Type to search..."}
+        placeholder={placeholder || 'Type to search...'}
         focus={isFocused}
       />
     </Box>

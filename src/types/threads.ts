@@ -208,4 +208,3 @@ export interface ThreadsDisplayOptions {
 // Connection types
 export type ThreadConnection = Connection<Thread>
 export type ThreadFieldSchemaConnection = Connection<ThreadFieldSchema>
-

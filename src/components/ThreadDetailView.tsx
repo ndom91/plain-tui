@@ -124,19 +124,23 @@ export function ThreadDetailView({
   return (
     <Layout
       title={thread.title}
-      subtitle={`Priority: ${getPriorityIcon(thread.priority)} (${getPriorityLabel(thread.priority)})`}
+      subtitle={`${getPriorityIcon(thread.priority)} ${getPriorityLabel(thread.priority)}`}
       statusText={thread.status}
       helpText={helpText}
     >
       <Box marginBottom={1} borderStyle="round" borderColor="green">
         <Box flexDirection="column">
-          <Text color="green" bold>
-            👤 Customer Information
-          </Text>
-          <Text>
-            {thread.customer.fullName} ({thread.customer.email.email})
-            {thread.customer.company && ` • 🏢 ${thread.customer.company.name}`}
-          </Text>
+          <Box>
+            <Text color="green" bold>
+              👤 Customer Information
+            </Text>
+          </Box>
+          <Box>
+            <Text>
+              {thread.customer.fullName} ({thread.customer.email.email})
+              {thread.customer.company && ` • 🏢 ${thread.customer.company.name}`}
+            </Text>
+          </Box>
 
           {thread.assignedToUser && (
             <Box marginTop={1}>

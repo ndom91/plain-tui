@@ -62,4 +62,3 @@ export interface CustomerTenantMembership {
 // Connection types
 export type TenantConnection = Connection<Tenant>
 export type CustomerGroupConnection = Connection<CustomerGroup>
-

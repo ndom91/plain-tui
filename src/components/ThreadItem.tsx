@@ -1,7 +1,9 @@
 import { Box, Text } from 'ink'
+import { Badge } from '@inkjs/ui'
+import type { Thread } from '../types/threads.js'
 
 interface ThreadItemProps {
-  thread: any
+  thread: Thread
   isSelected: boolean
 }
 
@@ -28,9 +30,23 @@ export function ThreadItem({ thread, isSelected }: ThreadItemProps) {
     }
   }
 
-  const getPriorityIcon = (priority: number) => {
-    const icons = ['⚪', '🟡', '🟠', '🔴', '🚨']
-    return icons[priority] || '⚪'
+  const getPriorityColor = (priority: number) => {
+    const icons = ['red', 'red', 'yellow', 'blue']
+    return icons[priority] || 'blue'
+  }
+
+  // const getPriorityLabel = (priority: number) => {
+  //   const labels: { [key: number]: string } = ['Low', 'Normal', 'High', 'Urgent']
+  //   return labels[priority]
+  // }
+  const getPriorityLabel = (priority: number) => {
+    const priorityLabels = {
+      0: 'Urgent',
+      1: 'High',
+      2: 'Normal',
+      3: 'Low',
+    }
+    return priorityLabels[priority]
   }
 
   return (
@@ -44,8 +60,10 @@ export function ThreadItem({ thread, isSelected }: ThreadItemProps) {
             {thread.title || 'Untitled Thread'}
           </Text>
           <Box>
-            <Text color={getStatusColor(thread.status)}>{thread.status} </Text>
-            <Text>{getPriorityIcon(thread.priority)}</Text>
+            <Badge color={getStatusColor(thread.status)}>{thread.status} </Badge>
+            <Badge color={getPriorityColor(thread.priority)}>
+              {getPriorityLabel(thread.priority)}
+            </Badge>
           </Box>
         </Box>
 

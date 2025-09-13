@@ -51,4 +51,3 @@ export interface UsersFilter {
 // Connection types
 export type UserConnection = Connection<User>
 export type MachineUserConnection = Connection<MachineUser>
-

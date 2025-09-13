@@ -64,4 +64,3 @@ export interface Connection<T> {
   edges: Edge<T>[]
   pageInfo: PageInfo
 }
-
