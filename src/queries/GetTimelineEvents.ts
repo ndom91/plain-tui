@@ -244,43 +244,171 @@ export const GetTimelineEventsQuery = gql`
               externalId
             }
             ... on ThreadAssignmentTransitionedEntry {
-              ...ThreadAssignmentTransitionedEntryParts
+              __typename
+              previousAssignee {
+                ... on User {
+                  id
+                  fullName
+                }
+                ... on MachineUser {
+                  id
+                  fullName
+                }
+                ... on System {
+                  id
+                }
+              }
+              nextAssignee {
+                ... on User {
+                  id
+                  fullName
+                }
+                ... on MachineUser {
+                  id
+                  fullName
+                }
+                ... on System {
+                  id
+                }
+              }
             }
             ... on ThreadAdditionalAssigneesTransitionedEntry {
-              ...ThreadAdditionalAssigneesTransitionedEntryParts
+              timelineEventId
+              title
+              customerId
+              externalId
+              previousAdditionalAssignees {
+                ... on UserActor {
+                  userId
+                  user {
+                    publicName
+                  }
+                }
+              }
+              newAdditionalAssignees {
+                ... on UserActor {
+                  userId
+                  user {
+                    publicName
+                  }
+                }
+              }
             }
             ... on ThreadStatusTransitionedEntry {
-              ...ThreadStatusTransitionedEntryParts
+              timelineEventId
+              title
+              customerId
+              externalId
+              previousStatus
+              newStatus
             }
             ... on ThreadPriorityChangedEntry {
-              ...ThreadPriorityChangedEntryParts
+              timelineEventId
+              title
+              customerId
+              externalId
+              previousPriority
+              newPriority
             }
             ... on ThreadLabelsChangedEntry {
-              ...ThreadLabelsChangedEntryParts
+              timelineEventId
+              title
+              customerId
+              externalId
+              previousLabels {
+                labelType {
+                  name
+                  color
+                }
+              }
+              newLabels {
+                labelType {
+                  name
+                  color
+                }
+              }
             }
             ... on LinearIssueThreadLinkStateTransitionedEntry {
-              ...LinearIssueThreadLinkStateTransitionedEntryParts
+              timelineEventId
+              title
+              customerId
+              externalId
+              linearIssueId
+              previousLinkState
+              newLinkState
             }
             ... on ServiceLevelAgreementStatusTransitionedEntry {
-              ...ServiceLevelAgreementStatusTransitionedEntryParts
+              timelineEventId
+              title
+              customerId
+              externalId
+              previousStatus
+              newStatus
             }
             ... on ThreadDiscussionEntry {
-              ...ThreadDiscussionEntryParts
+              timelineEventId
+              title
+              text
+              markdown
+              customerId
+              externalId
             }
             ... on ThreadDiscussionResolvedEntry {
-              ...ThreadDiscussionResolvedEntryParts
+              timelineEventId
+              title
+              customerId
+              externalId
+              resolvedAt {
+                ...DateTime
+              }
             }
             ... on MSTeamsMessageEntry {
-              ...MSTeamsMessageEntryParts
+              teamsMessageId
+              text
+              customerId
+              attachments {
+                id
+                fileName
+                fileSize {
+                  bytes
+                }
+                fileMimeType
+              }
             }
             ... on ThreadLinkUpdatedEntry {
-              ...ThreadLinkUpdatedEntryParts
+              timelineEventId
+              title
+              customerId
+              externalId
+              linkType
+              linkUrl
+              linkTitle
             }
             ... on DiscordMessageEntry {
-              ...DiscordMessageEntryParts
+              discordMessageId
+              text
+              customerId
+              channelId
+              channelName
+              attachments {
+                id
+                fileName
+                fileSize {
+                  bytes
+                }
+                fileMimeType
+              }
+              reactions {
+                name
+                count
+              }
             }
             ... on HelpCenterAiConversationMessageEntry {
-              ...HelpCenterAiConversationMessageEntryParts
+              conversationId
+              text
+              messageType
+              customerId
+              wasHelpful
             }
           }
         }
@@ -296,4 +424,3 @@ export const GetTimelineEventsQuery = gql`
     }
   }
 `
-
