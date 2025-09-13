@@ -273,98 +273,103 @@ export const GetTimelineEventsQuery = gql`
               }
             }
             ... on ThreadAdditionalAssigneesTransitionedEntry {
-              timelineEventId
-              title
-              customerId
-              externalId
-              previousAdditionalAssignees {
-                ... on UserActor {
-                  userId
-                  user {
-                    publicName
-                  }
+              __typename
+              previousAssignees {
+                ... on User {
+                  id
+                  fullName
+                }
+                ... on MachineUser {
+                  id
+                  fullName
+                }
+                ... on System {
+                  id
                 }
               }
-              newAdditionalAssignees {
-                ... on UserActor {
-                  userId
-                  user {
-                    publicName
-                  }
+              nextAssignees {
+                ... on User {
+                  id
+                  fullName
+                }
+                ... on MachineUser {
+                  id
+                  fullName
+                }
+                ... on System {
+                  id
                 }
               }
             }
             ... on ThreadStatusTransitionedEntry {
-              timelineEventId
-              title
-              customerId
-              externalId
-              previousStatus
-              newStatus
+              __typename
+              nextStatus
             }
             ... on ThreadPriorityChangedEntry {
-              timelineEventId
-              title
-              customerId
-              externalId
               previousPriority
-              newPriority
+              nextPriority
             }
             ... on ThreadLabelsChangedEntry {
-              timelineEventId
-              title
-              customerId
-              externalId
+              __typename
               previousLabels {
+                __typename
+                id
                 labelType {
+                  __typename
+                  id
                   name
+                  description
+                  icon
                   color
                 }
               }
-              newLabels {
+              nextLabels {
+                __typename
+                id
                 labelType {
+                  __typename
+                  id
                   name
+                  description
+                  icon
                   color
                 }
               }
             }
             ... on LinearIssueThreadLinkStateTransitionedEntry {
-              timelineEventId
-              title
-              customerId
-              externalId
+              __typename
               linearIssueId
-              previousLinkState
-              newLinkState
+              previousLinearStateId
+              nextLinearStateId
             }
             ... on ServiceLevelAgreementStatusTransitionedEntry {
-              timelineEventId
-              title
-              customerId
-              externalId
-              previousStatus
-              newStatus
+              __typename
+              previousSLAStatus: previousStatus
+              nextSLAStatus: nextStatus
             }
             ... on ThreadDiscussionEntry {
-              timelineEventId
-              title
-              text
-              markdown
+              __typename
+              slackChannelName
               customerId
-              externalId
+              threadDiscussionId
+              slackMessageLink
             }
             ... on ThreadDiscussionResolvedEntry {
-              timelineEventId
-              title
+              __typename
+              slackChannelName
               customerId
-              externalId
+              threadDiscussionId
+              slackMessageLink
               resolvedAt {
                 ...DateTime
               }
             }
             ... on MSTeamsMessageEntry {
-              teamsMessageId
+              __typename
               text
+              markdownContent
+              msTeamsMessageId
+              msTeamsMessageLink
               customerId
               attachments {
                 id
@@ -376,20 +381,30 @@ export const GetTimelineEventsQuery = gql`
               }
             }
             ... on ThreadLinkUpdatedEntry {
-              timelineEventId
-              title
-              customerId
-              externalId
-              linkType
-              linkUrl
-              linkTitle
+              __typename
+              threadLink {
+                id
+                threadId
+                title
+                url
+                description
+                status
+              }
+              previousThreadLink {
+                id
+                threadId
+                title
+                url
+                description
+                status
+              }
             }
             ... on DiscordMessageEntry {
+              __typename
+              markdownContent
               discordMessageId
-              text
+              discordMessageLink
               customerId
-              channelId
-              channelName
               attachments {
                 id
                 fileName
@@ -398,17 +413,12 @@ export const GetTimelineEventsQuery = gql`
                 }
                 fileMimeType
               }
-              reactions {
-                name
-                count
-              }
             }
             ... on HelpCenterAiConversationMessageEntry {
-              conversationId
-              text
-              messageType
-              customerId
-              wasHelpful
+              __typename
+              messageId
+              helpCenterId
+              messageMarkdown: markdown
             }
           }
         }
