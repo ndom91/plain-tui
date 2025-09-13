@@ -117,7 +117,7 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
       } else if (input === 'r') {
         refreshThreads(queryFilters)
       } else if ((key.upArrow || input === 'k') && threads.length > 0) {
-        if (offset <= 0) {
+        if (state.selectedIndex <= 0) {
           return
         }
         const newSelectedIndex = Math.max(0, state.selectedIndex - 1)
@@ -126,23 +126,40 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
           selectedIndex: newSelectedIndex,
         }))
 
-        // Measure current item height and subtract that from offset
-        const currentItemHeight = getThreadItemHeight(state.selectedIndex)
-        setOffset((offset) => Math.max(0, offset - currentItemHeight))
+        // Adjust offset to keep the selected item visible
+        if (newSelectedIndex < offset) {
+          setOffset(newSelectedIndex)
+        }
       } else if ((key.downArrow || input === 'j') && threads.length > 0) {
-        // if (offset >= threads.length - 1) {
-        //   return
-        // }
-        // const nextItemHeight = getThreadItemHeight(state.selectedIndex)
-        const newSelectedIndex = state.selectedIndex + 1
+        const newSelectedIndex = Math.min(threads.length - 1, state.selectedIndex + 1)
+        if (newSelectedIndex === state.selectedIndex) {
+          return // Already at the last item
+        }
+
         setState((prev) => ({
           ...prev,
           selectedIndex: newSelectedIndex,
         }))
 
-        // Measure next item height and add that to offset
-        const nextItemHeight = getThreadItemHeight(newSelectedIndex)
-        setOffset((offset) => offset + nextItemHeight)
+        // Calculate how many items can fit in the viewport based on measured heights
+        // Account for header and footer taking approximately 7 rows
+        const availableRows = Math.max(1, rows - 7)
+        let visibleItems = 0
+        let totalHeight = 0
+        for (let i = offset; i < threads.length && totalHeight < availableRows; i++) {
+          const itemHeight = getThreadItemHeight(i)
+          if (totalHeight + itemHeight <= availableRows) {
+            totalHeight += itemHeight
+            visibleItems++
+          } else {
+            break
+          }
+        }
+
+        // Adjust offset to keep the selected item visible
+        if (newSelectedIndex >= offset + visibleItems) {
+          setOffset(newSelectedIndex - visibleItems + 1)
+        }
       } else if (key.return && threads.length > 0) {
         const selectedThread = threads[state.selectedIndex]
         if (selectedThread) {
