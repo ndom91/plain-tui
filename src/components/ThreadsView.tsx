@@ -1,5 +1,6 @@
-import { Box, Text, useInput } from 'ink'
-import { useState, useEffect } from 'react'
+import { Box, Text, useFocus, useInput } from 'ink'
+import { useState, useEffect, useCallback } from 'react'
+import TextInput from 'ink-text-input'
 import type { PlainClient } from '../client.js'
 import { useRefreshQueries, useThreads } from '../hooks/usePlainQueries.js'
 import type { Workspace } from '../types/plain.js'
@@ -8,6 +9,7 @@ import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
 import { ScrollableList } from './ScrollableList.js'
 import { ThreadItem } from './ThreadItem.js'
+import type { Thread } from '../types/threads.js'
 
 interface ThreadsViewProps {
   client: PlainClient
@@ -18,6 +20,8 @@ interface ThreadsViewProps {
 interface ThreadsState {
   selectedIndex: number
   showFilters: boolean
+  showSearch: boolean
+  searchQuery: string
   filters: {
     statuses: string[]
     priorities: number[]
@@ -32,12 +36,27 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
   const [state, setState] = useState<ThreadsState>({
     selectedIndex: 0,
     showFilters: false,
+    showSearch: false,
+    searchQuery: '',
     filters: {
       statuses: [],
       priorities: [],
       assignedToUsers: [],
     },
   })
+
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
+
+  const { isFocused: isSearchFocused } = useFocus()
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(state.searchQuery)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [state.searchQuery])
 
   const { refreshThreads } = useRefreshQueries()
 
@@ -50,44 +69,69 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
   }
 
   const { data: threadsData, isLoading, error, isFetching } = useThreads(client, queryFilters)
-  const threads = threadsData?.threads.edges.map((edge: any) => edge.node) || []
+  const allThreads: Thread[] = threadsData?.threads.edges.map((edge: any) => edge.node) || []
+
+  const threads = debouncedSearchQuery.trim()
+    ? allThreads.filter(
+        (thread) =>
+          thread.title?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+          thread.description?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+          thread.customer?.fullName?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+          thread.customer?.email?.email?.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
+      )
+    : allThreads
 
   if (state.selectedIndex >= threads.length && threads.length > 0) {
     setState((prev) => ({ ...prev, selectedIndex: 0 }))
   }
 
-  useInput((input, key) => {
-    if (state.showFilters) {
+  useInput(
+    (input, key) => {
+      if (state.showFilters) {
+        if (input === 'q' || key.escape) {
+          setState((prev) => ({ ...prev, showFilters: false }))
+        }
+        return
+      }
+
       if (input === 'q' || key.escape) {
-        setState((prev) => ({ ...prev, showFilters: false }))
+        onNavigate('home')
+      } else if (input === '/') {
+        setState((prev) => ({ ...prev, showSearch: true }))
+      } else if (input === 'f') {
+        setState((prev) => ({ ...prev, showFilters: !prev.showFilters }))
+      } else if (input === 'r') {
+        refreshThreads(queryFilters)
+      } else if ((key.upArrow || input === 'k') && threads.length > 0) {
+        setState((prev) => ({
+          ...prev,
+          selectedIndex: Math.max(0, prev.selectedIndex - 1),
+        }))
+      } else if ((key.downArrow || input === 'j') && threads.length > 0) {
+        setState((prev) => ({
+          ...prev,
+          selectedIndex: Math.min(threads.length - 1, prev.selectedIndex + 1),
+        }))
+      } else if (key.return && threads.length > 0) {
+        const selectedThread = threads[state.selectedIndex]
+        if (selectedThread) {
+          onNavigate('thread-detail', selectedThread.id)
+        }
+      }
+    },
+    { isActive: !state.showSearch }
+  )
+  useInput((input, key) => {
+    if (state.showSearch) {
+      if (key.escape) {
+        setState((prev) => ({ ...prev, showSearch: false, searchQuery: '' }))
+      }
+      if (key.ctrl && input === 'u') {
+        setState((prev) => ({ ...prev, showSearch: true, searchQuery: '' }))
       }
       return
     }
-
-    if (input === 'q' || key.escape) {
-      onNavigate('home')
-    } else if (input === 'f') {
-      setState((prev) => ({ ...prev, showFilters: !prev.showFilters }))
-    } else if (input === 'r') {
-      refreshThreads(queryFilters)
-    } else if ((key.upArrow || input === 'k') && threads.length > 0) {
-      setState((prev) => ({
-        ...prev,
-        selectedIndex: Math.max(0, prev.selectedIndex - 1),
-      }))
-    } else if ((key.downArrow || input === 'j') && threads.length > 0) {
-      setState((prev) => ({
-        ...prev,
-        selectedIndex: Math.min(threads.length - 1, prev.selectedIndex + 1),
-      }))
-    } else if (key.return && threads.length > 0) {
-      const selectedThread = threads[state.selectedIndex]
-      if (selectedThread) {
-        onNavigate('thread-detail', selectedThread.id)
-      }
-    }
   })
-
 
   if (isLoading) {
     return (
@@ -123,18 +167,14 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
   }
 
   const threadItems = threads.map((thread, index) => (
-    <ThreadItem
-      key={thread.id}
-      thread={thread}
-      isSelected={index === state.selectedIndex}
-    />
+    <ThreadItem key={thread.id} thread={thread} isSelected={index === state.selectedIndex} />
   ))
 
   const helpText =
     isFetching && !isLoading ? (
       <Box>
         <Text color="gray" dimColor>
-          ↑/↓/j/k: Navigate • Enter: View • F: Filters •{' '}
+          ↑/↓/j/k: Navigate • Enter: View • /: Search • F: Filters •{' '}
         </Text>
         <LoadingSpinner text="" />
         <Text color="gray" dimColor>
@@ -143,14 +183,33 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
         </Text>
       </Box>
     ) : (
-      '↑/↓/j/k: Navigate • Enter: View • F: Filters • R: Refresh • Q: Back'
+      '↑/↓/j/k: Navigate • Enter: View • /: Search • F: Filters • R: Refresh • Q: Back'
     )
+
+  const searchInputComponent = state.showSearch ? (
+    <Box>
+      <Text color="gray">Search: </Text>
+      <TextInput
+        value={state.searchQuery}
+        onChange={(value) => setState((prev) => ({ ...prev, searchQuery: value }))}
+        onSubmit={() => setState((prev) => ({ ...prev, showSearch: false }))}
+        placeholder="Type to search threads..."
+      />
+    </Box>
+  ) : null
 
   return (
     <Layout
       title="Threads"
-      subtitle={`${threads.length} threads found`}
-      statusText={state.showFilters ? 'Filters Active' : undefined}
+      subtitle={`${threads.length} threads found${debouncedSearchQuery.trim() ? ` (filtered by: "${debouncedSearchQuery}")` : ''}`}
+      statusText={
+        state.showFilters
+          ? 'Filters Active'
+          : debouncedSearchQuery.trim()
+            ? 'Search Active'
+            : undefined
+      }
+      searchInput={searchInputComponent}
       helpText={helpText}
     >
       {threads.length === 0 ? (
@@ -158,9 +217,7 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
           <Text color="gray">No threads found</Text>
         </Box>
       ) : (
-        <ScrollableList selectedIndex={state.selectedIndex}>
-          {threadItems}
-        </ScrollableList>
+        <ScrollableList selectedIndex={state.selectedIndex}>{threadItems}</ScrollableList>
       )}
     </Layout>
   )

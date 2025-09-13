@@ -28,6 +28,7 @@
     "graphql-request": "^7.2.0",
     "graphql-tag": "^2.12.6",
     "ink": "^6.3.0",
+    "ink-text-input": "^6.0.0",
     "react": "^19.1.1"
   },
   "devDependencies": {

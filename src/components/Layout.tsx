@@ -7,10 +7,11 @@ interface LayoutProps {
   subtitle?: string
   statusText?: string
   helpText?: string | ReactNode
+  searchInput?: ReactNode
   children: ReactNode
 }
 
-export function Layout({ title, subtitle, statusText, helpText, children }: LayoutProps) {
+export function Layout({ title, subtitle, statusText, helpText, searchInput, children }: LayoutProps) {
   return (
     <FullScreen>
       <Box paddingX={2} paddingY={0} justifyContent="space-between">
@@ -22,6 +23,11 @@ export function Layout({ title, subtitle, statusText, helpText, children }: Layo
             <Text color="gray" dimColor>
               {subtitle}
             </Text>
+          )}
+          {searchInput && (
+            <Box marginTop={1}>
+              {searchInput}
+            </Box>
           )}
         </Box>
         {statusText && (

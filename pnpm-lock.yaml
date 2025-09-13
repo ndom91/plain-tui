@@ -29,6 +29,9 @@ importers:
       ink:
         specifier: ^6.3.0
         version: 6.3.0(@types/react@19.1.12)(react@19.1.1)
+      ink-text-input:
+        specifier: ^6.0.0
+        version: 6.0.0(ink@6.3.0(@types/react@19.1.12)(react@19.1.1))(react@19.1.1)
       react:
         specifier: ^19.1.1
         version: 19.1.1
@@ -1341,6 +1344,13 @@ packages:
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
+
+  ink-text-input@6.0.0:
+    resolution: {integrity: sha512-Fw64n7Yha5deb1rHY137zHTAbSTNelUKuB5Kkk2HACXEtwIHBCf9OH2tP/LQ9fRYTl1F0dZgbW0zPnZk6FA9Lw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      ink: '>=5'
+      react: '>=18'
 
   ink@6.3.0:
     resolution: {integrity: sha512-2CbJAa7XeziZYe6pDS5RVLirRY28iSGMQuEV8jRU5NQsONQNfcR/BZHHc9vkMg2lGYTHTM2pskxC1YmY28p6bQ==}
@@ -3466,6 +3476,13 @@ snapshots:
   indent-string@5.0.0: {}
 
   inherits@2.0.4: {}
+
+  ink-text-input@6.0.0(ink@6.3.0(@types/react@19.1.12)(react@19.1.1))(react@19.1.1):
+    dependencies:
+      chalk: 5.6.2
+      ink: 6.3.0(@types/react@19.1.12)(react@19.1.1)
+      react: 19.1.1
+      type-fest: 4.41.0
 
   ink@6.3.0(@types/react@19.1.12)(react@19.1.1):
     dependencies:
