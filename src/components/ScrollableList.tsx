@@ -60,7 +60,7 @@ export function ScrollableList({ children, selectedIndex }: ScrollableListProps)
         </Box>
       )}
 
-      <Box flexDirection="column" flexGrow={1}>
+      <Box flexDirection="column" flexGrow={1} gap={1}>
         {visibleItems}
       </Box>
 

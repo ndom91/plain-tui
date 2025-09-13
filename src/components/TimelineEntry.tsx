@@ -68,7 +68,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
     case 'EmailEntry': {
       return (
         <Box borderStyle="round" borderColor="green">
-          <Box flexDirection="column" width="100%" flexGrow={1}>
+          <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="green">📧 Email: {entry.subject || '(no subject)'}</Text>
               <Text color="gray">{time}</Text>
@@ -85,7 +85,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
             </Box>
             {entry.textContent && (
               <Box marginTop={1}>
-                <Text>{entry.textContent.substring(0, 200)}...</Text>
+                <Text>{entry.textContent}</Text>
               </Box>
             )}
             {entry.sendStatus && (
@@ -256,7 +256,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
         <Box borderStyle="round" borderColor="yellow">
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
-              <Text color="yellow">📋 Status Changed</Text>
+              <Text color="yellow">📋 Status Changed (by {actorName})</Text>
               <Text color="gray">{time}</Text>
             </Box>
             <Box marginTop={1}>
