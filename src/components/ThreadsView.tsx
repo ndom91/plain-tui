@@ -1,5 +1,5 @@
 import { Box, Text, useInput } from 'ink'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { PlainClient } from '../client.js'
 import { useRefreshQueries, useThreads } from '../hooks/usePlainQueries.js'
 import type { Workspace } from '../types/plain.js'
@@ -7,14 +7,13 @@ import type { View } from './App.js'
 import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
 import { ScrollableList } from './ScrollableList.js'
+import { ThreadItem } from './ThreadItem.js'
 
 interface ThreadsViewProps {
   client: PlainClient
   workspace: Workspace
   onNavigate: (view: View, threadId?: string) => void
 }
-
-// Thread interface imported from compatibility layer
 
 interface ThreadsState {
   selectedIndex: number
@@ -89,32 +88,6 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
     }
   })
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return (
-      date.toLocaleDateString() +
-      ' ' +
-      date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    )
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'TODO':
-        return 'yellow'
-      case 'DONE':
-        return 'green'
-      case 'SNOOZED':
-        return 'blue'
-      default:
-        return 'gray'
-    }
-  }
-
-  const getPriorityIcon = (priority: number) => {
-    const icons = ['⚪', '🟡', '🟠', '🔴', '🚨']
-    return icons[priority] || '⚪'
-  }
 
   if (isLoading) {
     return (
@@ -150,58 +123,11 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
   }
 
   const threadItems = threads.map((thread, index) => (
-    <Box
+    <ThreadItem
       key={thread.id}
-      borderStyle={index === state.selectedIndex ? 'round' : undefined}
-      borderColor={index === state.selectedIndex ? 'cyan' : undefined}
-    >
-      <Box flexDirection="column" width="100%">
-        <Box justifyContent="space-between">
-          <Text color={index === state.selectedIndex ? 'cyan' : 'white'} bold>
-            {thread.title || 'Untitled Thread'}
-          </Text>
-          <Box>
-            <Text color={getStatusColor(thread.status)}>{thread.status} </Text>
-            <Text>{getPriorityIcon(thread.priority)}</Text>
-          </Box>
-        </Box>
-
-        <Box>
-          <Text color="gray">
-            👤 {thread.customer.fullName} ({thread.customer.email.email})
-            {thread.customer.company && ` • 🏢 ${thread.customer.company.name}`}
-          </Text>
-        </Box>
-
-        {thread.assignedToUser && (
-          <Box>
-            <Text color="gray">👨 {thread.assignedToUser.user.publicName}</Text>
-          </Box>
-        )}
-
-        {thread.labels.length > 0 && (
-          <Box>
-            <Text color="gray">
-              🏷 {thread.labels.map((label) => label.labelType.name).join(', ')}
-            </Text>
-          </Box>
-        )}
-
-        {thread.previewText && (
-          <Box>
-            <Text color="gray" wrap="truncate">
-              💬 {thread.previewText}
-            </Text>
-          </Box>
-        )}
-
-        <Box>
-          <Text color="gray" dimColor>
-            🕐 Updated {formatDate(thread.updatedAt)} • Created {formatDate(thread.createdAt)}
-          </Text>
-        </Box>
-      </Box>
-    </Box>
+      thread={thread}
+      isSelected={index === state.selectedIndex}
+    />
   ))
 
   const helpText =
@@ -232,7 +158,7 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
           <Text color="gray">No threads found</Text>
         </Box>
       ) : (
-        <ScrollableList selectedIndex={state.selectedIndex} itemHeight={4}>
+        <ScrollableList selectedIndex={state.selectedIndex}>
           {threadItems}
         </ScrollableList>
       )}

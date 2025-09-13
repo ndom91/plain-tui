@@ -243,6 +243,45 @@ export const GetTimelineEventsQuery = gql`
               customerId
               externalId
             }
+            ... on ThreadAssignmentTransitionedEntry {
+              ...ThreadAssignmentTransitionedEntryParts
+            }
+            ... on ThreadAdditionalAssigneesTransitionedEntry {
+              ...ThreadAdditionalAssigneesTransitionedEntryParts
+            }
+            ... on ThreadStatusTransitionedEntry {
+              ...ThreadStatusTransitionedEntryParts
+            }
+            ... on ThreadPriorityChangedEntry {
+              ...ThreadPriorityChangedEntryParts
+            }
+            ... on ThreadLabelsChangedEntry {
+              ...ThreadLabelsChangedEntryParts
+            }
+            ... on LinearIssueThreadLinkStateTransitionedEntry {
+              ...LinearIssueThreadLinkStateTransitionedEntryParts
+            }
+            ... on ServiceLevelAgreementStatusTransitionedEntry {
+              ...ServiceLevelAgreementStatusTransitionedEntryParts
+            }
+            ... on ThreadDiscussionEntry {
+              ...ThreadDiscussionEntryParts
+            }
+            ... on ThreadDiscussionResolvedEntry {
+              ...ThreadDiscussionResolvedEntryParts
+            }
+            ... on MSTeamsMessageEntry {
+              ...MSTeamsMessageEntryParts
+            }
+            ... on ThreadLinkUpdatedEntry {
+              ...ThreadLinkUpdatedEntryParts
+            }
+            ... on DiscordMessageEntry {
+              ...DiscordMessageEntryParts
+            }
+            ... on HelpCenterAiConversationMessageEntry {
+              ...HelpCenterAiConversationMessageEntryParts
+            }
           }
         }
         cursor

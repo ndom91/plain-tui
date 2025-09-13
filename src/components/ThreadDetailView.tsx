@@ -8,6 +8,7 @@ import type { View } from './App.js'
 import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
 import { ScrollableList } from './ScrollableList.js'
+import { TimelineEntry } from './TimelineEntry.js'
 
 // Extract types from generated GraphQL types
 type TimelineNode = NonNullable<
@@ -111,221 +112,6 @@ export function ThreadDetailView({
     )
   }
 
-  const renderTimelineEntry = (entry: Entry, actor: Actor, timestamp: string, index: number) => {
-    const rawActorName =
-      actor.__typename === 'UserActor'
-        ? actor.user.publicName
-        : actor.__typename === 'CustomerActor'
-          ? actor.customer.fullName
-          : actor.__typename === 'MachineUserActor'
-            ? actor.machineUser.publicName
-            : actor.__typename === 'SystemActor'
-              ? 'System'
-              : 'Unknown'
-
-    const actorName = rawActorName.trim()
-
-    const time = formatDate(timestamp)
-
-    switch (entry.__typename) {
-      case 'ChatEntry':
-        return (
-          <Box key={`${index}-chat-${entry.chatId}`} borderStyle="round" borderColor="blue">
-            <Box flexDirection="column" width="100%">
-              <Box justifyContent="space-between" width="100%">
-                <Text color="blue">💬 Chat from {actorName}</Text>
-                <Text color="gray">{time}</Text>
-              </Box>
-              <Box marginTop={1}>
-                <Text>{entry.text || '(no text)'}</Text>
-              </Box>
-              {entry.customerReadAt && (
-                <Box marginTop={1}>
-                  <Text color="green">
-                    ✓ Read by customer at {formatDate(entry.customerReadAt)}
-                  </Text>
-                </Box>
-              )}
-              {entry.attachments && entry.attachments.length > 0 && (
-                <Box marginTop={1}>
-                  <Text color="cyan">📎 {entry.attachments.length} attachment(s)</Text>
-                </Box>
-              )}
-            </Box>
-          </Box>
-        )
-
-      case 'EmailEntry':
-        return (
-          <Box key={`${index}-email-${entry.emailId}`} borderStyle="round" borderColor="green">
-            <Box flexDirection="column" width="100%" flexGrow={1}>
-              <Box justifyContent="space-between" width="100%">
-                <Text color="green">📧 Email: {entry.subject || '(no subject)'}</Text>
-                <Text color="gray">{time}</Text>
-              </Box>
-              <Text color="gray">
-                From: {entry.from.name || entry.from.email} ({entry.from.email})
-              </Text>
-              <Text color="gray">
-                To: {entry.to.name || entry.to.email} ({entry.to.email})
-              </Text>
-              {entry.textContent && (
-                <Box marginTop={1}>
-                  <Text>{entry.textContent.substring(0, 200)}...</Text>
-                </Box>
-              )}
-              {entry.sendStatus && (
-                <Box marginTop={1}>
-                  <Text
-                    color={
-                      entry.sendStatus === 'SENT'
-                        ? 'green'
-                        : entry.sendStatus === 'FAILED'
-                          ? 'red'
-                          : 'yellow'
-                    }
-                  >
-                    Status: {entry.sendStatus}
-                  </Text>
-                </Box>
-              )}
-              {entry.attachments && entry.attachments.length > 0 && (
-                <Box marginTop={1}>
-                  <Text color="cyan">📎 {entry.attachments.length} attachment(s)</Text>
-                </Box>
-              )}
-            </Box>
-          </Box>
-        )
-
-      case 'NoteEntry':
-        return (
-          <Box key={`${index}-note-${entry.noteId}`} borderStyle="round" borderColor="yellow">
-            <Box flexDirection="column" width="100%">
-              <Box justifyContent="space-between" width="100%">
-                <Text color="yellow">📝 Note from {actorName}</Text>
-                <Text color="gray">{time}</Text>
-              </Box>
-              <Box marginTop={1}>
-                <Text>{entry.text}</Text>
-              </Box>
-              {entry.attachments && entry.attachments.length > 0 && (
-                <Box marginTop={1}>
-                  <Text color="cyan">📎 {entry.attachments.length} attachment(s)</Text>
-                </Box>
-              )}
-            </Box>
-          </Box>
-        )
-
-      case 'SlackMessageEntry':
-        return (
-          <Box
-            key={`${index}-slack-${entry.slackMessageLink}`}
-            borderStyle="round"
-            borderColor="magenta"
-            width="100%"
-          >
-            <Box flexDirection="column" width="100%">
-              <Box justifyContent="space-between" width="100%">
-                <Text color="magenta">💬 Slack message from {actorName}</Text>
-                <Text color="gray">{time}</Text>
-              </Box>
-              <Box marginTop={1}>
-                <Text>{entry.text}</Text>
-              </Box>
-              {entry.reactions && entry.reactions.length > 0 && (
-                <Box marginTop={1}>
-                  <Text color="cyan">
-                    Reactions: {entry.reactions.map((r: any) => r.name).join(' ')}
-                  </Text>
-                </Box>
-              )}
-            </Box>
-          </Box>
-        )
-
-      case 'SlackReplyEntry':
-        return (
-          <Box
-            key={`${index}-slack-reply-${entry.slackMessageLink}`}
-            borderStyle="round"
-            borderColor="magenta"
-          >
-            <Box flexDirection="column" width="100%">
-              <Box justifyContent="space-between" width="100%">
-                <Text color="magenta">
-                  {`↳`} Slack reply from {actorName}
-                </Text>
-                <Text color="gray">{time}</Text>
-              </Box>
-              <Box marginTop={1}>
-                <Text>{entry.text}</Text>
-              </Box>
-            </Box>
-          </Box>
-        )
-
-      case 'ThreadEventEntry':
-        return (
-          <Box
-            key={`${index}-thread-event-${entry.timelineEventId}`}
-            borderStyle="round"
-            borderColor="cyan"
-          >
-            <Box justifyContent="space-between">
-              <Text color="cyan">🎯 {entry.title}</Text>
-              <Text color="gray">{time}</Text>
-            </Box>
-          </Box>
-        )
-
-      case 'CustomerEventEntry':
-        return (
-          <Box
-            key={`${index}-customer-event-${entry.timelineEventId}`}
-            marginBottom={1}
-            borderStyle="round"
-            borderColor="blue"
-          >
-            <Box justifyContent="space-between" width="100%">
-              <Text color="blue">👤 {entry.title}</Text>
-              <Text color="gray">{time}</Text>
-            </Box>
-          </Box>
-        )
-
-      case 'CustomEntry':
-        return (
-          <Box
-            key={`${index}-custom-${entry.externalId || 'no-id'}`}
-            borderStyle="round"
-            borderColor="white"
-          >
-            <Box flexDirection="column" width="100%">
-              <Box justifyContent="space-between" width="100%">
-                <Text color="white">
-                  ⚡ {entry.title} {entry.type ? `(${entry.type})` : ''}
-                </Text>
-                <Text color="gray">{time}</Text>
-              </Box>
-            </Box>
-          </Box>
-        )
-
-      default:
-        return (
-          <Box key={`${index}-other-${entry.__typename}`} borderStyle="round" borderColor="gray">
-            <Box justifyContent="space-between" width="100%">
-              <Text color="gray">
-                🔄 {entry.__typename} by {actorName}
-              </Text>
-              <Text color="gray">{time}</Text>
-            </Box>
-          </Box>
-        )
-    }
-  }
 
   const helpText =
     (isFetching && !isLoading) || (timelineFetching && !timelineLoading) ? (
@@ -393,13 +179,19 @@ export function ThreadDetailView({
         ) : timeline.edges.length === 0 ? (
           <Text color="gray">No timeline entries found</Text>
         ) : (
-          <ScrollableList selectedIndex={selectedTimelineIndex} itemHeight={4}>
+          <ScrollableList selectedIndex={selectedTimelineIndex}>
             {timeline.edges
               .slice()
               .reverse() // Show most recent first
-              .map(({ node }, index) =>
-                renderTimelineEntry(node.entry, node.actor, node.timestamp, index)
-              )}
+              .map(({ node }, index) => (
+                <TimelineEntry
+                  key={`${index}-${node.entry.__typename}-${node.timestamp}`}
+                  entry={node.entry}
+                  actor={node.actor}
+                  timestamp={node.timestamp}
+                  index={index}
+                />
+              ))}
           </ScrollableList>
         )}
       </Box>
