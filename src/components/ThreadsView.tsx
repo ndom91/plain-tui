@@ -1,6 +1,5 @@
-import { Box, Text, useFocus, useInput } from 'ink'
-import { useState, useEffect, useCallback } from 'react'
-import TextInput from 'ink-text-input'
+import { Box, Text, useInput } from 'ink'
+import { useState, useCallback } from 'react'
 import type { PlainClient } from '../client.js'
 import { useRefreshQueries, useThreads } from '../hooks/usePlainQueries.js'
 import type { Workspace } from '../types/plain.js'
@@ -9,6 +8,7 @@ import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
 import { ScrollableList } from './ScrollableList.js'
 import { ThreadItem } from './ThreadItem.js'
+import { SearchInput } from './SearchInput.js'
 import type { Thread } from '../types/threads.js'
 
 interface ThreadsViewProps {
@@ -45,18 +45,6 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
     },
   })
 
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
-
-  const { isFocused: isSearchFocused } = useFocus()
-
-  // Debounce search query
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(state.searchQuery)
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [state.searchQuery])
 
   const { refreshThreads } = useRefreshQueries()
 
@@ -71,13 +59,13 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
   const { data: threadsData, isLoading, error, isFetching } = useThreads(client, queryFilters)
   const allThreads: Thread[] = threadsData?.threads.edges.map((edge: any) => edge.node) || []
 
-  const threads = debouncedSearchQuery.trim()
+  const threads = state.searchQuery.trim()
     ? allThreads.filter(
         (thread) =>
-          thread.title?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-          thread.description?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-          thread.customer?.fullName?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-          thread.customer?.email?.email?.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
+          thread.title?.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+          thread.description?.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+          thread.customer?.fullName?.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+          thread.customer?.email?.email?.toLowerCase().includes(state.searchQuery.toLowerCase())
       )
     : allThreads
 
@@ -121,17 +109,7 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
     },
     { isActive: !state.showSearch }
   )
-  useInput((input, key) => {
-    if (state.showSearch) {
-      if (key.escape) {
-        setState((prev) => ({ ...prev, showSearch: false, searchQuery: '' }))
-      }
-      if (key.ctrl && input === 'u') {
-        setState((prev) => ({ ...prev, showSearch: true, searchQuery: '' }))
-      }
-      return
-    }
-  })
+
 
   if (isLoading) {
     return (
@@ -187,25 +165,23 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
     )
 
   const searchInputComponent = state.showSearch ? (
-    <Box>
-      <Text color="gray">Search: </Text>
-      <TextInput
-        value={state.searchQuery}
-        onChange={(value) => setState((prev) => ({ ...prev, searchQuery: value }))}
-        onSubmit={() => setState((prev) => ({ ...prev, showSearch: false }))}
-        placeholder="Type to search threads..."
-      />
-    </Box>
+    <SearchInput
+      value={state.searchQuery}
+      onChange={(value) => setState((prev) => ({ ...prev, searchQuery: value }))}
+      onCancel={() => setState((prev) => ({ ...prev, showSearch: false, searchQuery: '' }))}
+      onSubmit={() => setState((prev) => ({ ...prev, showSearch: false }))}
+      placeholder="Type to search threads..."
+    />
   ) : null
 
   return (
     <Layout
       title="Threads"
-      subtitle={`${threads.length} threads found${debouncedSearchQuery.trim() ? ` (filtered by: "${debouncedSearchQuery}")` : ''}`}
+      subtitle={`${threads.length} threads found${state.searchQuery.trim() ? ` (filtered by: "${state.searchQuery}")` : ''}`}
       statusText={
         state.showFilters
           ? 'Filters Active'
-          : debouncedSearchQuery.trim()
+          : state.searchQuery.trim()
             ? 'Search Active'
             : undefined
       }
