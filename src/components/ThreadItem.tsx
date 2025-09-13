@@ -53,6 +53,7 @@ export function ThreadItem({ thread, isSelected }: ThreadItemProps) {
     <Box
       borderStyle={isSelected ? 'round' : undefined}
       borderColor={isSelected ? 'cyan' : undefined}
+      flexShrink={0}
     >
       <Box flexDirection="column" width="100%">
         <Box justifyContent="space-between">

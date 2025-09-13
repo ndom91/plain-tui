@@ -56,7 +56,7 @@ export function Layout({
         {children}
       </Box>
 
-      <Box paddingX={2} paddingY={0} justifyContent="space-between">
+      <Box borderStyle={'round'} paddingX={2} paddingY={0} justifyContent="space-between">
         <Box>
           <Text color="green" bold>
             Plain TUI

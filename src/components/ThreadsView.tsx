@@ -1,5 +1,5 @@
-import { Box, Text, useInput } from 'ink'
-import { useState } from 'react'
+import { Box, Text, useInput, measureElement } from 'ink'
+import { useState, useRef, useCallback } from 'react'
 import type { GetThreadsArgs, PlainClient } from '../client.js'
 import { useRefreshQueries, useThreads } from '../hooks/usePlainQueries.js'
 import type { Workspace } from '../types/plain.js'
@@ -10,6 +10,8 @@ import { LoadingSpinner } from './LoadingSpinner.js'
 import { ScrollableList } from './ScrollableList.js'
 import { SearchInput } from './SearchInput.js'
 import { ThreadItem } from './ThreadItem.js'
+import { ScrollBox } from './ScrollBox.js'
+import { useStdoutDimensions } from '../lib/useStdoutDimensions.js'
 
 interface ThreadsViewProps {
   client: PlainClient
@@ -41,8 +43,20 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
       assignedToUsers: [],
     },
   })
+  const [offset, setOffset] = useState(0)
+  const [_columns, rows] = useStdoutDimensions()
+  const threadItemRefs = useRef<Map<string, HTMLElement>>(new Map())
 
   const { refreshThreads } = useRefreshQueries()
+
+  // Callback to store thread item refs
+  const setThreadItemRef = useCallback((threadId: string, element: HTMLElement | null) => {
+    if (element) {
+      threadItemRefs.current.set(threadId, element)
+    } else {
+      threadItemRefs.current.delete(threadId)
+    }
+  }, [])
 
   const queryFilters: GetThreadsArgs = {
     statuses: state.filters.statuses.length > 0 ? state.filters.statuses : undefined,
@@ -64,6 +78,16 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
           thread.customer?.email?.email?.toLowerCase().includes(state.searchQuery.toLowerCase())
       )
     : allThreads
+
+  const getThreadItemHeight = (index: number): number => {
+    if (index >= threads.length) return 1
+    const threadId = threads[index].id
+    const element = threadItemRefs.current.get(threadId)
+    if (element) {
+      return measureElement(element).height
+    }
+    return 1
+  }
 
   if (state.selectedIndex >= threads.length && threads.length > 0) {
     setState((prev) => ({ ...prev, selectedIndex: 0 }))
@@ -93,15 +117,32 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
       } else if (input === 'r') {
         refreshThreads(queryFilters)
       } else if ((key.upArrow || input === 'k') && threads.length > 0) {
+        if (offset <= 0) {
+          return
+        }
+        const newSelectedIndex = Math.max(0, state.selectedIndex - 1)
         setState((prev) => ({
           ...prev,
-          selectedIndex: Math.max(0, prev.selectedIndex - 1),
+          selectedIndex: newSelectedIndex,
         }))
+
+        // Measure current item height and subtract that from offset
+        const currentItemHeight = getThreadItemHeight(state.selectedIndex)
+        setOffset((offset) => Math.max(0, offset - currentItemHeight))
       } else if ((key.downArrow || input === 'j') && threads.length > 0) {
+        // if (offset >= threads.length - 1) {
+        //   return
+        // }
+        // const nextItemHeight = getThreadItemHeight(state.selectedIndex)
+        const newSelectedIndex = state.selectedIndex + 1
         setState((prev) => ({
           ...prev,
-          selectedIndex: Math.min(threads.length - 1, prev.selectedIndex + 1),
+          selectedIndex: newSelectedIndex,
         }))
+
+        // Measure next item height and add that to offset
+        const nextItemHeight = getThreadItemHeight(newSelectedIndex)
+        setOffset((offset) => offset + nextItemHeight)
       } else if (key.return && threads.length > 0) {
         const selectedThread = threads[state.selectedIndex]
         if (selectedThread) {
@@ -146,7 +187,9 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
   }
 
   const threadItems = threads.map((thread, index) => (
-    <ThreadItem key={thread.id} thread={thread} isSelected={index === state.selectedIndex} />
+    <Box key={thread.id} ref={(el) => setThreadItemRef(thread.id, el)} flexShrink={0}>
+      <ThreadItem thread={thread} isSelected={index === state.selectedIndex} />
+    </Box>
   ))
 
   const helpText =
@@ -194,7 +237,9 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
           <Text color="gray">No threads found</Text>
         </Box>
       ) : (
-        <ScrollableList selectedIndex={state.selectedIndex}>{threadItems}</ScrollableList>
+        <ScrollBox height={rows} offset={offset} flexGrow={1}>
+          {threadItems}
+        </ScrollBox>
       )}
     </Layout>
   )
