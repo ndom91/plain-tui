@@ -4,6 +4,8 @@ import type { PlainClient } from '../client.js'
 import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
 import { Layout } from './Layout.js'
+import Gradient from 'ink-gradient'
+import BigText from 'ink-big-text'
 
 interface HomeScreenProps {
   client: PlainClient
@@ -52,8 +54,9 @@ export function HomeScreen({ workspace, onNavigate }: HomeScreenProps) {
 
   return (
     <Layout
-      title={`Plain (${workspace.name})`}
-      helpText="↑/↓/j/k: Navigate • Enter: Select • Letter keys: Quick nav • Q: Quit"
+      title={workspace.name}
+      helpText="↑/↓/j/k: Navigate • Enter: Select • Q: Quit"
+      footer={false}
     >
       <Box flexDirection="column" padding={2} flexGrow={1}>
         <Box
@@ -63,10 +66,10 @@ export function HomeScreen({ workspace, onNavigate }: HomeScreenProps) {
           justifyContent="center"
           alignItems="center"
         >
-          <Box width={60} marginBottom={2}>
-            <Text color="yellow" bold>
-              Main Menu
-            </Text>
+          <Box marginBottom={2}>
+            <Gradient name="cristal">
+              <BigText text="Plain" align="left" font="block" />
+            </Gradient>
           </Box>
 
           {menuItems.map((item, index) => (
@@ -88,11 +91,10 @@ export function HomeScreen({ workspace, onNavigate }: HomeScreenProps) {
           ))}
         </Box>
 
-        {/* Help Section */}
-        <Box marginTop={2} borderStyle="round" borderColor="gray" padding={1}>
+        <Box marginY={0} borderStyle="round" borderColor="gray" padding={1}>
           <Box flexDirection="column">
             <Text color="green" bold>
-              ⌨ Keyboard Shortcuts
+              Keyboard Shortcuts
             </Text>
             <Text color="gray">↑/↓ or j/k: Navigate menu • Enter: Select option</Text>
             <Text color="gray">Letter keys: Quick navigation • Q: Quit • Ctrl+C: Force exit</Text>

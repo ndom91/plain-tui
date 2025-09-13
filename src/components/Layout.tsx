@@ -2,6 +2,8 @@ import { Box, Text } from 'ink'
 import type { ReactNode } from 'react'
 import { FullScreen } from './FullScreen.js'
 import { Badge } from '@inkjs/ui'
+import Gradient from 'ink-gradient'
+import BigText from 'ink-big-text'
 
 interface LayoutProps {
   title: string
@@ -9,6 +11,7 @@ interface LayoutProps {
   statusText?: string
   helpText?: string | ReactNode
   searchInput?: ReactNode
+  footer?: boolean
   children: ReactNode
 }
 
@@ -18,6 +21,7 @@ export function Layout({
   statusText,
   helpText,
   searchInput,
+  footer = true,
   children,
 }: LayoutProps) {
   return (
@@ -29,6 +33,7 @@ export function Layout({
         paddingX={2}
         paddingY={0}
         justifyContent="space-between"
+        flexShrink={0}
       >
         <Box flexDirection="column">
           <Box>
@@ -56,22 +61,30 @@ export function Layout({
         {children}
       </Box>
 
-      <Box borderStyle={'round'} paddingX={2} paddingY={0} justifyContent="space-between">
-        <Box>
-          <Text color="green" bold>
-            Plain TUI
-          </Text>
+      {footer && (
+        <Box
+          borderStyle={'round'}
+          paddingX={2}
+          paddingY={0}
+          justifyContent="space-between"
+          flexShrink={0}
+        >
+          <Box width={27}>
+            <Gradient name="cristal">
+              <BigText text="Plain" align="left" font="tiny" lineHeight={1} />
+            </Gradient>
+          </Box>
+          <Box alignItems="center">
+            {helpText && typeof helpText === 'string' ? (
+              <Text color="gray" dimColor>
+                {helpText}
+              </Text>
+            ) : (
+              helpText
+            )}
+          </Box>
         </Box>
-        <Box>
-          {helpText && typeof helpText === 'string' ? (
-            <Text color="gray" dimColor>
-              {helpText}
-            </Text>
-          ) : (
-            helpText
-          )}
-        </Box>
-      </Box>
+      )}
     </FullScreen>
   )
 }

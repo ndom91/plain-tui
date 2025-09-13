@@ -237,8 +237,7 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
 
   return (
     <Layout
-      title="Threads"
-      subtitle={`${threads.length} threads found${state.searchQuery.trim() ? ` (filtered by: "${state.searchQuery}")` : ''}`}
+      title={`Threads | ${threads.length} threads found`}
       statusText={
         state.showFilters
           ? 'Filters Active'
