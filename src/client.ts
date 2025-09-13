@@ -10,6 +10,23 @@ import {
   GetTimelineEventsQuery,
   GetWorkspaceQuery,
 } from './queries/index.js'
+// Import generated query types (avoid conflicts with existing response types)
+import type {
+  GetWorkspaceQuery,
+  GetThreadsQuery,
+  GetCustomersQuery,
+  GetTenantsQuery,
+  GetThreadDetailsQuery,
+  GetTimelineEventsQuery,
+} from './types/generated/graphql.js'
+
+// Define response types based on generated types
+type WorkspaceResponse = GetWorkspaceQuery
+type ThreadsResponse = GetThreadsQuery
+type CustomersResponse = GetCustomersQuery
+type TenantsResponse = GetTenantsQuery
+type ThreadDetailsResponse = GetThreadDetailsQuery
+type TimelineEventsResponse = GetTimelineEventsQuery
 import type { Connection } from './types/base.js'
 import type {
   SimpleCustomer as Customer,
@@ -306,4 +323,14 @@ export class PlainClient {
       },
     }
   }
+}
+
+// Export types for use in hooks
+export type {
+  WorkspaceResponse,
+  ThreadsResponse,
+  CustomersResponse,
+  TenantsResponse,
+  ThreadDetailsResponse,
+  TimelineEventsResponse,
 }

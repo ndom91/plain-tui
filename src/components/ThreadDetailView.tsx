@@ -5,8 +5,16 @@ import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
 import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
-import type { ThreadEventEntry } from '../types/timeline.js'
-import type { Actor } from '../types/index.js'
+import type {
+  GetTimelineEventsQuery,
+  GetThreadDetailsQuery
+} from '../types/generated/graphql.js'
+
+// Extract types from generated GraphQL types
+type TimelineNode = NonNullable<GetTimelineEventsQuery['thread']>['timelineEntries']['edges'][0]['node']
+type Actor = TimelineNode['actor']
+type Entry = TimelineNode['entry']
+type DateTime = TimelineNode['timestamp']
 
 interface ThreadDetailViewProps {
   client: PlainClient
@@ -98,12 +106,7 @@ export function ThreadDetailView({
     )
   }
 
-  const renderTimelineEntry = (
-    entry: ThreadEventEntry,
-    actor: any,
-    timestamp: string,
-    index: number
-  ) => {
+  const renderTimelineEntry = (entry: Entry, actor: Actor, timestamp: string, index: number) => {
     const actorName =
       actor.__typename === 'UserActor'
         ? actor.user.publicName

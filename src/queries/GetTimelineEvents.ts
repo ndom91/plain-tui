@@ -31,6 +31,16 @@ export const GetTimelineEventsQuery = gql`
                 avatarUrl
               }
             }
+            ... on MachineUserActor {
+              machineUserId
+              machineUser {
+                __typename
+                id
+                fullName
+                publicName
+                description
+              }
+            }
             ... on CustomerActor {
               customerId
               customer {
