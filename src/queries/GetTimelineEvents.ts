@@ -72,6 +72,7 @@ export const GetTimelineEventsQuery = gql`
               }
             }
             ... on EmailEntry {
+              __typename
               emailId
               subject
               textContent
@@ -193,6 +194,7 @@ export const GetTimelineEventsQuery = gql`
               }
             }
             ... on SlackReplyEntry {
+              __typename
               slackMessageLink
               slackWebMessageLink
               customerId
@@ -232,12 +234,14 @@ export const GetTimelineEventsQuery = gql`
               }
             }
             ... on ThreadEventEntry {
+              __typename
               timelineEventId
               title
               customerId
               externalId
             }
             ... on CustomerEventEntry {
+              __typename
               timelineEventId
               title
               customerId
@@ -306,6 +310,7 @@ export const GetTimelineEventsQuery = gql`
               nextStatus
             }
             ... on ThreadPriorityChangedEntry {
+              __typename
               previousPriority
               nextPriority
             }
