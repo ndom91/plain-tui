@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev:og": "tsx src/index.ts",
-    "dev": "vite-node -w src/index.tsx",
+    "dev": "FORCE_HYPERLINK=1 vite-node -w src/index.tsx",
     "build": "tsc",
     "codegen": "graphql-codegen --config codegen.ts",
     "codegen:watch": "graphql-codegen --config codegen.ts --watch",
