@@ -9,6 +9,7 @@ import { LoadingSpinner } from './LoadingSpinner.js'
 import { ScrollableList } from './ScrollableList.js'
 import { TimelineEntry } from './TimelineEntry.js'
 import Link from 'ink-link'
+import { Badge } from '@inkjs/ui'
 
 interface ThreadDetailViewProps {
   client: PlainClient
@@ -129,14 +130,16 @@ export function ThreadDetailView({
   return (
     <Layout
       title={
-        <Box justifyContent="space-between" width={'auto'}>
-          <Box>
+        <Box flexDirection="row" justifyContent="space-between" alignItems="center" width={'100%'}>
+          <Box flexGrow={1}>
             <Text color="cyan" bold>
               {thread.title}
             </Text>
           </Box>
-          <Box>
-            <Link url={generatePlainLink()}>Open in Plain</Link>
+          <Box flexShrink={0} marginRight={-6}>
+            <Badge color="green">
+              <Link url={generatePlainLink()}>Open in Plain</Link>
+            </Badge>
           </Box>
         </Box>
       }
