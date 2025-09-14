@@ -1,7 +1,7 @@
 import { Box, Text } from 'ink'
 import type { GetTimelineEventsQuery } from '../types/generated/graphql.js'
 import Divider from './Divider.js'
-import { getStatusColor } from './ThreadItem.js'
+import { getPriorityColor, getStatusColor } from './ThreadItem.js'
 
 type TimelineNode = NonNullable<
   GetTimelineEventsQuery['thread']
@@ -257,11 +257,11 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
       return (
         <Divider
           title={
-            <Text>
-              Status Changed to{' '}
-              <Text color={getStatusColor(entry.nextStatus)}>{entry.nextStatus}</Text> (by{' '}
-              {actorName})
-            </Text>
+            <Box gap={1}>
+              <Text>Status changed to</Text>
+              <Text color={getStatusColor(entry.nextStatus)}>{entry.nextStatus}</Text>
+              <Text>({actorName})</Text>
+            </Box>
           }
         />
       )
@@ -273,19 +273,21 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
         return labels[priority] || `Priority ${priority}`
       }
       return (
-        <Box borderStyle="round" borderColor="red">
-          <Box flexDirection="column" width="100%">
-            <Box justifyContent="space-between" width="100%">
-              <Text color="red">🔥 Priority Changed</Text>
-              <Text color="gray">{time}</Text>
-            </Box>
-            <Box marginTop={1}>
-              <Text color="gray">
-                {getPriorityLabel(entry.previousPriority)} → {getPriorityLabel(entry.nextPriority)}
+        <Divider
+          title={
+            <Box gap={1}>
+              <Text>Priority changed</Text>
+              <Text color={getPriorityColor(entry.previousPriority)}>
+                {getPriorityLabel(entry.previousPriority)}
               </Text>
+              <Text>→</Text>
+              <Text color={getPriorityColor(entry.nextPriority)}>
+                {getPriorityLabel(entry.nextPriority)}
+              </Text>
+              <Text>({actorName})</Text>
             </Box>
-          </Box>
-        </Box>
+          }
+        />
       )
     }
 
