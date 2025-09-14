@@ -73,8 +73,8 @@ export function HomeScreen({ workspace, onNavigate }: HomeScreenProps) {
           </Box>
 
           {menuItems.map((item, index) => (
-            <Box key={item.key} marginBottom={1} justifyContent="center">
-              <Box width={60}>
+            <Box key={item.key} justifyContent="center">
+              <Box width={50}>
                 <Text
                   color={selectedIndex === index ? 'black' : 'white'}
                   backgroundColor={selectedIndex === index ? 'cyan' : undefined}

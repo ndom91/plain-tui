@@ -446,7 +446,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
               <Text color="gray">{time}</Text>
             </Box>
             <Box marginTop={1}>
-              <Text>{entry.markdownContent || '(no content)'}</Text>
+              <Text>{entry.markdownContent ?? '(no content)'}</Text>
             </Box>
             {entry.attachments && entry.attachments.length > 0 && (
               <Box marginTop={1}>

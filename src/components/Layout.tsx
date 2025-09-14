@@ -6,8 +6,8 @@ import Gradient from 'ink-gradient'
 import BigText from 'ink-big-text'
 
 interface LayoutProps {
-  title: string
-  subtitle?: string
+  title: string | ReactNode
+  subtitle?: string | ReactNode
   statusText?: string
   helpText?: string | ReactNode
   searchInput?: ReactNode
@@ -37,15 +37,23 @@ export function Layout({
       >
         <Box flexDirection="column">
           <Box>
-            <Text color="cyan" bold>
-              {title}
-            </Text>
+            {title && typeof title === 'string' ? (
+              <Text color="cyan" bold>
+                {title}
+              </Text>
+            ) : (
+              title
+            )}
           </Box>
           {subtitle && (
             <Box>
-              <Text color="gray" dimColor>
-                {subtitle}
-              </Text>
+              {subtitle && typeof subtitle === 'string' ? (
+                <Text color="gray" dimColor>
+                  {subtitle}
+                </Text>
+              ) : (
+                subtitle
+              )}
             </Box>
           )}
           {searchInput && <Box marginTop={1}>{searchInput}</Box>}

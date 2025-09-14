@@ -8,6 +8,7 @@ import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
 import { ScrollableList } from './ScrollableList.js'
 import { TimelineEntry } from './TimelineEntry.js'
+import Link from 'ink-link'
 
 interface ThreadDetailViewProps {
   client: PlainClient
@@ -18,7 +19,7 @@ interface ThreadDetailViewProps {
 
 export function ThreadDetailView({
   client,
-  workspace: _workspace,
+  workspace,
   threadId,
   onNavigate,
 }: ThreadDetailViewProps) {
@@ -121,9 +122,22 @@ export function ThreadDetailView({
       '↑/↓/j/k: Navigate • F: Filters • R: Refresh • Q: Back'
     )
 
+  const generatePlainLink = () => {
+    return `https://app.plain.com/workspace/${workspace.id}/thread/${thread.id}`
+  }
+
   return (
     <Layout
-      title={thread.title}
+      title={
+        <Box justifyContent="space-between" width={'100%'}>
+          <Text color="cyan" bold>
+            {thread.title}
+          </Text>
+          <Box>
+            <Link url={generatePlainLink()}>Open in Plain</Link>
+          </Box>
+        </Box>
+      }
       subtitle={`${getPriorityIcon(thread.priority)} ${getPriorityLabel(thread.priority)}`}
       statusText={thread.status}
       helpText={helpText}
