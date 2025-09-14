@@ -147,7 +147,7 @@ export function ThreadDetailView({
       statusText={thread.status}
       helpText={helpText}
     >
-      <Box marginBottom={1} borderStyle="round" borderColor="green">
+      <Box marginBottom={1} borderStyle="round" borderColor="green" flexShrink={0}>
         <Box flexDirection="column">
           <Box>
             <Text color="green" bold>
@@ -196,7 +196,7 @@ export function ThreadDetailView({
           <ScrollableList selectedIndex={selectedTimelineIndex}>
             {timeline.edges
               .slice()
-              .reverse() // Show most recent first
+              .reverse()
               .map(({ node }, index) => (
                 <TimelineEntry
                   key={`${index}-${node.entry.__typename}-${node.timestamp}`}

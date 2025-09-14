@@ -105,8 +105,9 @@ export interface Thread {
   statusDetail?: ThreadStatusDetail
   statusChangedAt: DateTime
   priority: number
-  assignedToUser?: {
-    user: User
+  assignedTo?: {
+    id: string
+    fullName?: string
   }
   assignedAt?: DateTime
   labels: Label[]

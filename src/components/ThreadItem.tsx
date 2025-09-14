@@ -35,10 +35,6 @@ export function ThreadItem({ thread, isSelected }: ThreadItemProps) {
     )
   }
 
-  // const getPriorityLabel = (priority: number) => {
-  //   const labels: { [key: number]: string } = ['Low', 'Normal', 'High', 'Urgent']
-  //   return labels[priority]
-  // }
   const getPriorityLabel = (priority: number) => {
     const priorityLabels = {
       0: 'Urgent',
@@ -74,20 +70,25 @@ export function ThreadItem({ thread, isSelected }: ThreadItemProps) {
             {thread.customer.company && ` • 🏢 ${thread.customer.company.name}`}
           </Text>
         </Box>
-
-        {thread.assignedToUser && (
+        {thread.assignedTo && (
           <Box>
-            <Text color="gray">👨 {thread.assignedToUser.user.publicName}</Text>
+            <Text color="gray">👨 Assigned: {thread.assignedTo.fullName ?? 'System'}</Text>
           </Box>
         )}
 
         {thread.labels.length > 0 && (
           <Box>
             <Text color="gray">
-              🏷 {thread.labels.map((label) => label.labelType.name).join(', ')}
+              {`📝`} Labels: {thread.labels.map((label) => label.labelType.name).join(', ')}
             </Text>
           </Box>
         )}
+        <Box>
+          <Text color="gray">
+            🕐 Updated {formatDate(thread.updatedAt as unknown as string)} • Created{' '}
+            {formatDate(thread.createdAt as unknown as string)}
+          </Text>
+        </Box>
 
         {thread.previewText && (
           <Box>
@@ -96,12 +97,6 @@ export function ThreadItem({ thread, isSelected }: ThreadItemProps) {
             </Text>
           </Box>
         )}
-
-        <Box>
-          <Text color="gray" dimColor>
-            🕐 Updated {formatDate(thread.updatedAt)} • Created {formatDate(thread.createdAt)}
-          </Text>
-        </Box>
       </Box>
     </Box>
   )

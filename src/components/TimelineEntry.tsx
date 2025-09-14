@@ -43,7 +43,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
   switch (entry.__typename) {
     case 'ChatEntry': {
       return (
-        <Box borderStyle="round" borderColor="blue">
+        <Box borderStyle="round" borderColor="blue" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="blue">💬 Chat from {actorName}</Text>
@@ -69,7 +69,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     case 'EmailEntry': {
       return (
-        <Box borderStyle="round" borderColor="green">
+        <Box borderStyle="round" borderColor="green" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="green">📧 Email: {entry.subject || '(no subject)'}</Text>
@@ -117,7 +117,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     case 'NoteEntry': {
       return (
-        <Box borderStyle="round" borderColor="yellow">
+        <Box borderStyle="round" borderColor="yellow" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="yellow">📝 Note from {actorName}</Text>
@@ -138,7 +138,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     case 'SlackMessageEntry': {
       return (
-        <Box borderStyle="round" borderColor="magenta" width="100%">
+        <Box borderStyle="round" borderColor="magenta" width="100%" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="magenta">💬 Slack message from {actorName}</Text>
@@ -161,7 +161,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     case 'SlackReplyEntry': {
       return (
-        <Box borderStyle="round" borderColor="magenta">
+        <Box borderStyle="round" borderColor="magenta" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="magenta">
@@ -179,7 +179,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     case 'ThreadEventEntry': {
       return (
-        <Box borderStyle="round" borderColor="cyan">
+        <Box borderStyle="round" borderColor="cyan" flexShrink={0}>
           <Box justifyContent="space-between">
             <Text color="cyan">🎯 {entry.title}</Text>
             <Text color="gray">{time}</Text>
@@ -190,7 +190,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     case 'CustomerEventEntry': {
       return (
-        <Box borderStyle="round" borderColor="blue">
+        <Box borderStyle="round" borderColor="blue" flexShrink={0}>
           <Box justifyContent="space-between" width="100%">
             <Text color="blue">👤 {entry.title}</Text>
             <Text color="gray">{time}</Text>
@@ -200,7 +200,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
     }
     case 'CustomEntry': {
       return (
-        <Box borderStyle="round" borderColor="white">
+        <Box borderStyle="round" borderColor="white" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="white">
@@ -216,7 +216,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
       const prevAssignee = entry.previousAssignee?.fullName || 'Unassigned'
       const nextAssignee = entry.nextAssignee?.fullName || 'Unassigned'
       return (
-        <Box borderStyle="round" borderColor="orange">
+        <Box borderStyle="round" borderColor="orange" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="orange">👤 Assignment Changed</Text>
@@ -236,7 +236,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
       const prevAssignees = entry.previousAssignees?.map((a) => a.fullName).join(', ') || 'None'
       const nextAssignees = entry.nextAssignees?.map((a) => a.fullName).join(', ') || 'None'
       return (
-        <Box borderStyle="round" borderColor="orange">
+        <Box borderStyle="round" borderColor="orange" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="orange">👥 Additional Assignees Changed</Text>
@@ -295,7 +295,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
       const prevLabels = entry.previousLabels?.map((l) => l.labelType.name).join(', ') || 'None'
       const nextLabels = entry.nextLabels?.map((l) => l.labelType.name).join(', ') || 'None'
       return (
-        <Box borderStyle="round" borderColor="cyan">
+        <Box borderStyle="round" borderColor="cyan" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="cyan">🏷 Labels Changed</Text>
@@ -314,7 +314,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     case 'LinearIssueThreadLinkStateTransitionedEntry': {
       return (
-        <Box borderStyle="round" borderColor="magenta">
+        <Box borderStyle="round" borderColor="magenta" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="magenta">🔗 Linear Issue Link Changed</Text>
@@ -335,7 +335,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     case 'ServiceLevelAgreementStatusTransitionedEntry': {
       return (
-        <Box borderStyle="round" borderColor="green">
+        <Box borderStyle="round" borderColor="green" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="green">⏰ SLA Status Changed</Text>
@@ -353,7 +353,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     case 'ThreadDiscussionEntry': {
       return (
-        <Box borderStyle="round" borderColor="blue">
+        <Box borderStyle="round" borderColor="blue" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="blue">💬 Discussion Started</Text>
@@ -374,7 +374,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     case 'ThreadDiscussionResolvedEntry': {
       return (
-        <Box borderStyle="round" borderColor="green">
+        <Box borderStyle="round" borderColor="green" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="green">✅ Discussion Resolved</Text>
@@ -393,7 +393,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     case 'MSTeamsMessageEntry': {
       return (
-        <Box borderStyle="round" borderColor="blue">
+        <Box borderStyle="round" borderColor="blue" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="blue">💬 Teams Message from {actorName}</Text>
@@ -417,7 +417,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
       const prevLinkTitle =
         entry.previousThreadLink?.title || entry.previousThreadLink?.url || 'Previous Link'
       return (
-        <Box borderStyle="round" borderColor="cyan">
+        <Box borderStyle="round" borderColor="cyan" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="cyan">🔗 Thread Link Updated</Text>
@@ -441,7 +441,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     case 'DiscordMessageEntry': {
       return (
-        <Box borderStyle="round" borderColor="magenta">
+        <Box borderStyle="round" borderColor="magenta" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="magenta">💬 Discord Message from {actorName}</Text>
@@ -462,7 +462,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     case 'HelpCenterAiConversationMessageEntry': {
       return (
-        <Box borderStyle="round" borderColor="green">
+        <Box borderStyle="round" borderColor="green" flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="green">🤖 AI Conversation Message</Text>
@@ -478,7 +478,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     default: {
       return (
-        <Box padding={1}>
+        <Box padding={1} flexShrink={0}>
           <Box justifyContent="space-between" width="100%">
             <Text color="gray">
               🔄 {entry.__typename} by {actorName} {JSON.stringify(entry, null, 2)}

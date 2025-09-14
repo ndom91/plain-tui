@@ -31,6 +31,22 @@ export const GetThreadsQuery = gql`
               name
             }
           }
+          assignedTo {
+            ... on User {
+              id
+              fullName
+            }
+            ... on MachineUser {
+              id
+              fullName
+            }
+            ... on System {
+              id
+            }
+          }
+          assignedAt {
+            ...DateTime
+          }
           labels {
             id
             labelType {
