@@ -1,5 +1,6 @@
 import { Box, Text } from 'ink'
 import type { GetTimelineEventsQuery } from '../types/generated/graphql.js'
+import Divider from './Divider.js'
 
 type TimelineNode = NonNullable<
   GetTimelineEventsQuery['thread']
@@ -252,19 +253,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
     }
 
     case 'ThreadStatusTransitionedEntry': {
-      return (
-        <Box borderStyle="round" borderColor="yellow">
-          <Box flexDirection="column" width="100%">
-            <Box justifyContent="space-between" width="100%">
-              <Text color="yellow">📋 Status Changed (by {actorName})</Text>
-              <Text color="gray">{time}</Text>
-            </Box>
-            <Box marginTop={1}>
-              <Text color="gray">New Status: {entry.nextStatus}</Text>
-            </Box>
-          </Box>
-        </Box>
-      )
+      return <Divider title={`Status Changed to ${entry.nextStatus} (by ${actorName})`} />
     }
 
     case 'ThreadPriorityChangedEntry': {

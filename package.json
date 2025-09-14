@@ -30,7 +30,6 @@
     "graphql-tag": "^2.12.6",
     "ink": "^6.3.0",
     "ink-big-text": "^2.0.0",
-    "ink-divider": "^4.1.1",
     "ink-gradient": "^3.0.0",
     "ink-link": "^5.0.0",
     "ink-text-input": "^6.0.0",
