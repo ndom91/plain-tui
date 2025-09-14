@@ -7,6 +7,19 @@ interface ThreadItemProps {
   isSelected: boolean
 }
 
+export const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'TODO':
+      return 'yellow'
+    case 'DONE':
+      return 'green'
+    case 'SNOOZED':
+      return 'blue'
+    default:
+      return 'gray'
+  }
+}
+
 export function ThreadItem({ thread, isSelected }: ThreadItemProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -15,19 +28,6 @@ export function ThreadItem({ thread, isSelected }: ThreadItemProps) {
       ' ' +
       date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     )
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'TODO':
-        return 'yellow'
-      case 'DONE':
-        return 'green'
-      case 'SNOOZED':
-        return 'blue'
-      default:
-        return 'gray'
-    }
   }
 
   const getPriorityColor = (priority: number) => {

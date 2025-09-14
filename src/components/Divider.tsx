@@ -1,4 +1,5 @@
 import { Box, type BoxProps, Text, type TextProps } from 'ink'
+import type { ReactNode } from 'react'
 
 /**
  * Props for the Divider component.
@@ -16,7 +17,7 @@ interface DividerProps {
    *
    * @default null
    */
-  title?: string
+  title?: string | ReactNode
 
   /**
    * Width of the divider.
@@ -179,11 +180,17 @@ const Divider: React.FC<DividerProps> = ({
 
   // Otherwise, return the divider line with the title in the middle
   return (
-    <Box width={width} paddingLeft={padding} paddingRight={padding} gap={titlePadding}>
+    <Box flexShrink={0} width={width} paddingX={padding} gap={titlePadding}>
       {dividerLine}
 
       <Box>
-        <Text color={titleColor}>{title}</Text>
+        {title && typeof title === 'string' ? (
+          <Text color={titleColor} bold>
+            {title}
+          </Text>
+        ) : (
+          title
+        )}
       </Box>
 
       {dividerLine}

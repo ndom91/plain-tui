@@ -129,10 +129,12 @@ export function ThreadDetailView({
   return (
     <Layout
       title={
-        <Box justifyContent="space-between" width={'100%'}>
-          <Text color="cyan" bold>
-            {thread.title}
-          </Text>
+        <Box justifyContent="space-between" width={'auto'}>
+          <Box>
+            <Text color="cyan" bold>
+              {thread.title}
+            </Text>
+          </Box>
           <Box>
             <Link url={generatePlainLink()}>Open in Plain</Link>
           </Box>
