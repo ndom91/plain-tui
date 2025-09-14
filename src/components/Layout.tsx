@@ -77,7 +77,7 @@ export function Layout({
           justifyContent="space-between"
           flexShrink={0}
         >
-          <Box width={27}>
+          <Box width={27} marginY={-2}>
             <Gradient name="cristal">
               <BigText text="Plain" align="left" font="tiny" lineHeight={1} />
             </Gradient>
