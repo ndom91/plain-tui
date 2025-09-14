@@ -63,11 +63,11 @@ export function TenantsView({ client, onNavigate }: TenantsViewProps) {
         <LoadingSpinner text="" />
         <Text color="gray" dimColor>
           {' '}
-          Refreshing • Q: Back
+          Refreshing • Q/Esc: Back
         </Text>
       </Box>
     ) : (
-      '↑/↓/j/k: Navigate • Enter: View • F: Filters • R: Refresh • Q: Back'
+      '↑/↓/j/k: Navigate • Enter: View • F: Filters • R: Refresh • Q/Esc: Back'
     )
 
   return (

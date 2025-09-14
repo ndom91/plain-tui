@@ -102,11 +102,11 @@ export function CustomersView({ client, onNavigate }: CustomersViewProps) {
         <LoadingSpinner text="" />
         <Text color="gray" dimColor>
           {' '}
-          Refreshing • Q: Back
+          Refreshing • Q/Esc: Back
         </Text>
       </Box>
     ) : (
-      '↑/↓/j/k: Navigate • F: Filters • R: Refresh • Q: Back'
+      '↑/↓/j/k: Navigate • F: Filters • R: Refresh • Q/Esc: Back'
     )
 
   return (

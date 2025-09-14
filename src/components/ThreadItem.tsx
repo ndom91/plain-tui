@@ -20,6 +20,11 @@ export const getStatusColor = (status: string) => {
   }
 }
 
+export const getPriorityColor = (priority: number) => {
+  const icons = ['red', 'red', 'yellow', 'blue']
+  return icons[priority] || 'blue'
+}
+
 export function ThreadItem({ thread, isSelected }: ThreadItemProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -28,11 +33,6 @@ export function ThreadItem({ thread, isSelected }: ThreadItemProps) {
       ' ' +
       date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     )
-  }
-
-  const getPriorityColor = (priority: number) => {
-    const icons = ['red', 'red', 'yellow', 'blue']
-    return icons[priority] || 'blue'
   }
 
   // const getPriorityLabel = (priority: number) => {

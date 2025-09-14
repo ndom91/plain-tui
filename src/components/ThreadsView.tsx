@@ -218,11 +218,11 @@ export function ThreadsView({ client, onNavigate }: ThreadsViewProps) {
         <LoadingSpinner text="" />
         <Text color="gray" dimColor>
           {' '}
-          Refreshing • Q: Back
+          Refreshing • Q/Esc: Back
         </Text>
       </Box>
     ) : (
-      '↑/↓/j/k: Navigate • Enter: View • /: Search • F: Filters • R: Refresh • Q: Back'
+      '↑/↓/j/k: Navigate • Enter: View • /: Search • F: Filters • R: Refresh • Q/Esc: Back'
     )
 
   const searchInputComponent = state.showSearch ? (
