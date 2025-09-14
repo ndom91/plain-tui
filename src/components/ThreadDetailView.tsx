@@ -6,7 +6,8 @@ import type { Workspace } from '../types/plain.js'
 import type { View } from './App.js'
 import { Layout } from './Layout.js'
 import { LoadingSpinner } from './LoadingSpinner.js'
-import { ScrollableList } from './ScrollableList.js'
+import { ScrollBox } from './ScrollBox.js'
+import { useStdoutDimensions } from '../lib/useStdoutDimensions.js'
 import { TimelineEntry } from './TimelineEntry.js'
 import Link from 'ink-link'
 import { Badge } from '@inkjs/ui'
@@ -37,6 +38,8 @@ export function ThreadDetailView({
   const timeline = timelineData?.thread?.timelineEntries
 
   const [selectedTimelineIndex, setSelectedTimelineIndex] = useState(0)
+  const [offset, setOffset] = useState(0)
+  const [_columns, rows] = useStdoutDimensions()
 
   useInput((input, key) => {
     if (input === 'q' || key.escape) {
@@ -45,9 +48,25 @@ export function ThreadDetailView({
       refreshThreadDetails(threadId)
       refreshTimelineEvents(threadId)
     } else if ((key.downArrow || input === 'j') && timeline) {
-      setSelectedTimelineIndex((prev) => Math.min(prev + 1, timeline.edges.length - 1))
+      const newSelectedIndex = Math.min(selectedTimelineIndex + 1, timeline.edges.length - 1)
+      setSelectedTimelineIndex(newSelectedIndex)
+
+      // Calculate how many items can fit in the viewport
+      const availableRows = Math.max(1, rows - 10) // Account for header, customer info, and footer
+      const visibleItems = Math.floor(availableRows / 3) // Assuming ~3 rows per timeline entry
+
+      // Adjust offset to keep the selected item visible
+      if (newSelectedIndex >= offset + visibleItems) {
+        setOffset(newSelectedIndex - visibleItems + 1)
+      }
     } else if ((key.upArrow || input === 'k') && timeline) {
-      setSelectedTimelineIndex((prev) => Math.max(prev - 1, 0))
+      const newSelectedIndex = Math.max(selectedTimelineIndex - 1, 0)
+      setSelectedTimelineIndex(newSelectedIndex)
+
+      // Adjust offset to keep the selected item visible
+      if (newSelectedIndex < offset) {
+        setOffset(newSelectedIndex)
+      }
     }
   })
 
@@ -193,20 +212,21 @@ export function ThreadDetailView({
         ) : timeline.edges.length === 0 ? (
           <Text color="gray">No timeline entries found</Text>
         ) : (
-          <ScrollableList selectedIndex={selectedTimelineIndex}>
+          <ScrollBox height={rows} offset={offset} flexGrow={1} gap={1}>
             {timeline.edges
               .slice()
               .reverse()
               .map(({ node }, index) => (
                 <TimelineEntry
-                  key={`${index}-${node.entry.__typename}-${node.timestamp}`}
+                  key={node.id}
                   entry={node.entry}
                   actor={node.actor}
                   timestamp={node.timestamp}
                   index={index}
+                  isSelected={index === selectedTimelineIndex}
                 />
               ))}
-          </ScrollableList>
+          </ScrollBox>
         )}
       </Box>
     </Layout>

@@ -14,9 +14,16 @@ interface TimelineEntryProps {
   actor: Actor
   timestamp: string
   index: number
+  isSelected?: boolean
 }
 
-export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryProps) {
+export function TimelineEntry({
+  entry,
+  actor,
+  timestamp,
+  index,
+  isSelected = false,
+}: TimelineEntryProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return (
@@ -43,7 +50,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
   switch (entry.__typename) {
     case 'ChatEntry': {
       return (
-        <Box borderStyle="round" borderColor="blue" flexShrink={0}>
+        <Box borderStyle="round" borderColor={isSelected ? 'cyan' : 'blue'} flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="blue">💬 Chat from {actorName}</Text>
@@ -69,7 +76,7 @@ export function TimelineEntry({ entry, actor, timestamp, index }: TimelineEntryP
 
     case 'EmailEntry': {
       return (
-        <Box borderStyle="round" borderColor="green" flexShrink={0}>
+        <Box borderStyle="round" borderColor={isSelected ? 'cyan' : 'green'} flexShrink={0}>
           <Box flexDirection="column" width="100%">
             <Box justifyContent="space-between" width="100%">
               <Text color="green">📧 Email: {entry.subject || '(no subject)'}</Text>
