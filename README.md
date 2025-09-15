@@ -10,6 +10,8 @@ A full-screen terminal application (TUI) for interacting with Plain, your favori
 - **📜 Thread Timeline**: Detailed view with full conversation history
 - **⌨️ Keyboard Navigation**: Vim-like keyboard shortcuts
 
+![](./demo.gif)
+
 ## 🏗️ Setup
 
 This TUI application is written using React's `ink` library and communicates
