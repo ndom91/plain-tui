@@ -44,7 +44,6 @@ import type { TimelineEntry, TimelineEntryConnection } from './types/timeline.js
 
 interface PlainConfig {
   apiKey: string
-  workspaceId?: string
   endpoint?: string
 }
 
@@ -186,11 +185,6 @@ export class PlainClient {
       'Content-Type': 'application/json',
     }
 
-    // Add workspace ID if provided
-    if (this.config.workspaceId) {
-      headers['Plain-Workspace-Id'] = this.config.workspaceId
-    }
-
     this.client = new GraphQLClient(
       this.config.endpoint || 'https://core-api.uk.plain.com/graphql/v1',
       {
@@ -211,7 +205,7 @@ export class PlainClient {
       return config
     } catch {
       throw new Error(
-        `Failed to load config from ${configPath}. Please create the file with your Plain API key and workspaceId.`
+        `Failed to load config from ${configPath}. Please create the file with your Plain API key.`
       )
     }
   }

@@ -1,3 +1,5 @@
 node_modules
 schema.graphql
 dist
+codegen.js*
+codegen.d.ts*
